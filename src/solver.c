@@ -75,12 +75,10 @@ FLOAT calcdt(FLOAT dx, FLOAT sps)
 }
 
 /*TODO
- * Write the function to calculate the F-vectors.
  * Use the fourth order interpolation scheme to calculate 'F-half' with neighboring cell values.
  * Define the iteration function which will be used in the main.*/
  
 //Calculate the F-vectors for the corresponding U-vectors
-
 void calcF(F_grid *F, U_grid *U)
 {
 	int i;
