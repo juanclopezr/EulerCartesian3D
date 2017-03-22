@@ -123,12 +123,36 @@ void calcF(F_grid *F, U_grid *U, int pos_x, int pos_y, int pos_z)
 void newU(U_grid *U, F_grid *F, physics_grid *P, int pos_x, int pos_y, int pos_z, FLOAT dt)
 {
 	FLOAT *F_nhjk,*F_phjk,*F_inhk,*F_iphk,*F_ijnh,*F_ijph;
-	F_nhjk = (FLOAT *)malloc((NDIM+2)*sizeof(FLOAT));
-	F_phjk = (FLOAT *)malloc((NDIM+2)*sizeof(FLOAT));
-	F_inhk = (FLOAT *)malloc((NDIM+2)*sizeof(FLOAT));
-	F_iphk = (FLOAT *)malloc((NDIM+2)*sizeof(FLOAT));
-	F_ijnh = (FLOAT *)malloc((NDIM+2)*sizeof(FLOAT));
-	F_ijph = (FLOAT *)malloc((NDIM+2)*sizeof(FLOAT));
+	if(!(F_nhjk = (FLOAT *)malloc((NDIM+2)*sizeof(FLOAT))))
+	{
+		fprintf(stderr, "Problem with data allocation\n");fflush(stdout);
+		exit(0);
+	}
+	if(!(F_phjk = (FLOAT *)malloc((NDIM+2)*sizeof(FLOAT))))
+	{
+		fprintf(stderr, "Problem with data allocation\n");fflush(stdout);
+		exit(0);
+	}
+	if(!(F_inhk = (FLOAT *)malloc((NDIM+2)*sizeof(FLOAT))))
+	{
+		fprintf(stderr, "Problem with data allocation\n");fflush(stdout);
+		exit(0);
+	}
+	if(!(F_iphk = (FLOAT *)malloc((NDIM+2)*sizeof(FLOAT))))
+	{
+		fprintf(stderr, "Problem with data allocation\n");fflush(stdout);
+		exit(0);
+	}
+	if(!(F_ijnh = (FLOAT *)malloc((NDIM+2)*sizeof(FLOAT))))
+	{
+		fprintf(stderr, "Problem with data allocation\n");fflush(stdout);
+		exit(0);
+	}
+	if(!(F_ijph = (FLOAT *)malloc((NDIM+2)*sizeof(FLOAT))))
+	{
+		fprintf(stderr, "Problem with data allocation\n");fflush(stdout);
+		exit(0);
+	}
 	int i;
 	if(pos_x > 0 && pos_x < F->N_x)
 	{
