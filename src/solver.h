@@ -1,9 +1,9 @@
 int transform_U(U_grid *U, int pos_x, int pos_y, int pos_z, int prop);
 FLOAT extract_rho(U_grid *U, int pos_x, int pos_y, int pos_z);
-FLOAT extract_u(U_grid *U, int pos_x, int pos_y, int pos_z);
-FLOAT extract_v(U_grid *U, int pos_x, int pos_y, int pos_z);
-FLOAT extract_w(U_grid *U, int pos_x, int pos_y, int pos_z);
-FLOAT extract_E(U_grid *U, int pos_x, int pos_y, int pos_z);
+FLOAT extract_u(U_grid *U, int pos_x, int pos_y, int pos_z, FLOAT rho);
+FLOAT extract_v(U_grid *U, int pos_x, int pos_y, int pos_z, FLOAT rho);
+FLOAT extract_w(U_grid *U, int pos_x, int pos_y, int pos_z, FLOAT rho);
+FLOAT extract_E(U_grid *U, int pos_x, int pos_y, int pos_z, FLOAT rho);
 FLOAT calce(FLOAT E, FLOAT u, FLOAT v, FLOAT w);
 FLOAT calcp(FLOAT rho, FLOAT e);
 FLOAT calch(FLOAT E, FLOAT p, FLOAT rho);

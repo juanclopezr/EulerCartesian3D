@@ -17,27 +17,27 @@ FLOAT extract_rho(U_grid *U, int pos_x, int pos_y, int pos_z)
 }
 
 //Extracts the value of u for a given cell
-FLOAT extract_u(U_grid *U, int pos_x, int pos_y, int pos_z)
+FLOAT extract_u(U_grid *U, int pos_x, int pos_y, int pos_z, FLOAT rho)
 {
-	return U->U[transform_U(U,pos_x,pos_y,pos_z,1)]/extract_rho(U, pos_x, pos_y, pos_z);
+	return U->U[transform_U(U,pos_x,pos_y,pos_z,1)]/rho;
 }
 
 //Extracts the value of v for a given cell
-FLOAT extract_v(U_grid *U, int pos_x, int pos_y, int pos_z)
+FLOAT extract_v(U_grid *U, int pos_x, int pos_y, int pos_z, FLOAT rho)
 {
-	return U->U[transform_U(U,pos_x,pos_y,pos_z,2)]/extract_rho(U, pos_x, pos_y, pos_z);
+	return U->U[transform_U(U,pos_x,pos_y,pos_z,2)]/rho;
 }
 
 //Extracts the value of w for a given cell
-FLOAT extract_w(U_grid *U, int pos_x, int pos_y, int pos_z)
+FLOAT extract_w(U_grid *U, int pos_x, int pos_y, int pos_z, FLOAT rho)
 {
-	return U->U[transform_U(U,pos_x,pos_y,pos_z,3)]/extract_rho(U, pos_x, pos_y, pos_z);
+	return U->U[transform_U(U,pos_x,pos_y,pos_z,3)]/rho;
 }
 
 //Extracts the value of E for a given cell
-FLOAT extract_E(U_grid *U, int pos_x, int pos_y, int pos_z)
+FLOAT extract_E(U_grid *U, int pos_x, int pos_y, int pos_z, FLOAT rho)
 {
-	return U->U[transform_U(U,pos_x,pos_y,pos_z,4)]/extract_rho(U, pos_x, pos_y, pos_z);
+	return U->U[transform_U(U,pos_x,pos_y,pos_z,4)]/rho;
 }
 
 //Calculates the value of e
@@ -64,14 +64,48 @@ FLOAT calcs(FLOAT h)
 	return sqrt(h*(GAMMA+1));
 }
 
-/*TODO
- * Find the general max value of (u+cs,v+cs,w+cs) of all cells
- * This is necessary for calculating the maximum sound speed*/
-
-//Finds the maximum sounds speed of the whole array
+//Finds the maximum sound speed of the whole array
 FLOAT calcsps(U_grid *U, FLOAT cs)
 {
-	return 0;
+	FLOAT sps_max = 0;
+	FLOAT temp,E,u,v,w,e,p,rho;
+	int i,j,k;
+	for(i=0;i<U->N_x;i++)
+	{
+		for(j=0;j<U->N_y;j++)
+		{
+			for(k=0;k<U->N_z;k++)
+			{
+				
+				rho = extract_rho(U,i,j,k);
+				E = extract_E(U,i,j,k,rho);
+				u = extract_u(U,i,j,k,rho);
+				v = extract_v(U,i,j,k,rho);
+				w = extract_w(U,i,j,k,rho);
+				e = calce(E,u,v,w);
+				p = calcp(rho,e);
+				temp = 0;
+				if(u>temp)
+				{
+					temp = u;
+				}
+				if(v>temp)
+				{
+					temp = v;
+				}
+				if(w>temp)
+				{
+					temp = w;
+				}
+				temp += calcs(calch(E,p,rho));
+				if(temp>sps_max)
+				{
+					sps_max=temp;
+				}
+			}
+		}
+	}
+	return sps_max;
 }
 
 //Calculates dt
@@ -91,10 +125,10 @@ void calcF(F_grid *F, U_grid *U, int pos_x, int pos_y, int pos_z)
 {
 	FLOAT rho,u,v,w,E,e,p;
 	rho = extract_rho(U,pos_x,pos_y,pos_z);
-	u = extract_u(U,pos_x,pos_y,pos_z);
-	v = extract_v(U,pos_x,pos_y,pos_z);
-	w = extract_w(U,pos_x,pos_y,pos_z);
-	E = extract_E(U,pos_x,pos_y,pos_z);
+	u = extract_u(U,pos_x,pos_y,pos_z,rho);
+	v = extract_v(U,pos_x,pos_y,pos_z,rho);
+	w = extract_w(U,pos_x,pos_y,pos_z,rho);
+	E = extract_E(U,pos_x,pos_y,pos_z,rho);
 	e = calce(E,u,v,w);
 	p = calcp(rho,e);
 	F->F[transform_F(F,pos_x,pos_y,pos_z,0,0)] = rho*u;
@@ -113,11 +147,6 @@ void calcF(F_grid *F, U_grid *U, int pos_x, int pos_y, int pos_z)
 	F->F[transform_F(F,pos_x,pos_y,pos_z,1,4)] = rho*(E+p/rho)*v;
 	F->F[transform_F(F,pos_x,pos_y,pos_z,2,4)] = rho*(E+p/rho)*w;
 }
-
-	//FLOAT h,cs,sps,dt; To be used in iterations
-	//h = calch(E,p,rho);
-	//cs = calcs(h);
-	//sps = calcsps(U,cs);
 
 //One iteration for U-update
 void newU(U_grid *U, F_grid *F, physics_grid *P, int pos_x, int pos_y, int pos_z, FLOAT dt)
