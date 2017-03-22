@@ -3,8 +3,8 @@ CC_OPTIONS =   -O2 -Wall
 EXEC = euler.x
 LIBS = -lm 
 
-OBJS = struct.o init.o io.o main.o 
-INCL = Makefile struct.h io.h init.h
+OBJS = struct.o init.o solver.o io.o main.o 
+INCL = Makefile struct.h io.h init.h solver.h
 
 
 all: $(EXEC)
