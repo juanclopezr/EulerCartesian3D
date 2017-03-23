@@ -65,7 +65,7 @@ FLOAT calcs(FLOAT h)
 }
 
 //Finds the maximum sound speed of the whole array
-FLOAT calcsps(U_grid *U, FLOAT cs)
+FLOAT calcsps(U_grid *U)
 {
 	FLOAT sps_max = 0;
 	FLOAT temp,E,u,v,w,e,p,rho;

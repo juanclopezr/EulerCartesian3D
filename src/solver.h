@@ -8,7 +8,7 @@ FLOAT calce(FLOAT E, FLOAT u, FLOAT v, FLOAT w);
 FLOAT calcp(FLOAT rho, FLOAT e);
 FLOAT calch(FLOAT E, FLOAT p, FLOAT rho);
 FLOAT calcs(FLOAT h);
-FLOAT calcsps(U_grid *U, FLOAT cs);
+FLOAT calcsps(U_grid *U);
 FLOAT calcdt(physics_grid *P, FLOAT sps);
 int transform_F(F_grid *F, int pos_x, int pos_y, int pos_z, int pos_g, int prop);
 void calcF(F_grid *F, U_grid *U, int pos_x, int pos_y, int pos_z);

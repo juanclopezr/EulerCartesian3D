@@ -3,6 +3,7 @@
 #include "init.h"
 #include "io.h"
 #include "solver.h"
+#include "problem.h"
 
 
 int main(int argc, char **argv){
