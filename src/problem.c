@@ -1,10 +1,22 @@
 #include "struct.h"
 #include "solver.h"
+#include <stdio.h>
 
 //Gives the initial condition for the problem
 void init_cond(U_grid *U)
 {
-	U->U[transform_U(U,(U->N_x-1)/2,(U->N_y-1)/2,(U->N_z-1)/2,0)] = RHO;
+    int i, j, k;
+    for(i=0; i<U->N_x; i++)
+    {
+        for(j=0; j<U->N_y; j++)
+        {
+            for(k=0; k<U->N_z; k++)
+            {
+                U->U[transform_U(U, i, j, k, 0)] = RHO;
+            }
+        }
+    }
+	U->U[transform_U(U,(U->N_x-1)/2,(U->N_y-1)/2,(U->N_z-1)/2, 4)] = RHO*1e13;
 }
 
 //Run the whole simulation
@@ -37,7 +49,7 @@ void prob_solve(U_grid *U, F_grid *F, physics_grid *P, FLOAT T)
 				}
 			}
 		}
-		
+		printf("%f %f\n", t, dt);
 		t += dt;
 	}
 }

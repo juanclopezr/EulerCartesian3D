@@ -7,7 +7,7 @@
 //Transform function for accessing the U-indices
 int transform_U(U_grid *U, int pos_x, int pos_y, int pos_z, int prop)
 {
-	return ((pos_x*U->N_x + pos_y)*U->N_y + pos_z)*U->N_z + prop;
+	return ((prop*U->N_z+pos_z)*U->N_y+pos_y)*U->N_x+pos_x;
 }
 
 //Extracts the value of rho for a given cell
@@ -84,6 +84,8 @@ FLOAT calcsps(U_grid *U)
 				w = extract_w(U,i,j,k,rho);
 				e = calce(E,u,v,w);
 				p = calcp(rho,e);
+                
+                printf("%f %f %f %f %f %f %f\n", rho, E, u, v, w, e, p);
 				temp = 0;
 				if(u>temp)
 				{
@@ -117,7 +119,7 @@ FLOAT calcdt(physics_grid *P, FLOAT sps)
 //Transform function for accessing the F-indices
 int transform_F(F_grid *F, int pos_x, int pos_y, int pos_z, int pos_g, int prop)
 {
-	return (((pos_x*F->N_x + pos_y)*F->N_y + pos_z)*F->N_z + pos_g)*NDIM + prop;
+	return (((prop*NDIM+pos_g)*F->N_z+pos_z)*F->N_y+pos_y)*F->N_x+pos_x;
 }
 
 //Calculate F-vector
