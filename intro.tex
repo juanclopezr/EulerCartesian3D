@@ -1,0 +1,29 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{listings}
+\usepackage{color}
+\lstset{language=C, basicstyle=\footnotesize, keywordstyle=\color{blue}}
+\usepackage{tcolorbox}
+
+\begin{document}
+	\begin{center}
+		{\LARGE\scshape M\'etodos Computacionales Avanzados
+			\\
+			\Large EulerCartesian3D}
+	\end{center}
+	\begin{tcolorbox}[colback=blue!5,colframe=blue!75!black,title= init.h]
+		\lstinputlisting{src/init.h}
+	\end{tcolorbox}
+	\begin{tcolorbox}[colback=blue!5,colframe=blue!75!black,title= io.h]
+		\lstinputlisting{src/io.h}
+	\end{tcolorbox}
+	\begin{tcolorbox}[colback=blue!5,colframe=blue!75!black,title= problem.h]
+		\lstinputlisting{src/problem.h}
+	\end{tcolorbox}
+	\begin{tcolorbox}[colback=blue!5,colframe=blue!75!black,title= solver.h]
+		\lstinputlisting{src/solver.h}
+	\end{tcolorbox}
+	\begin{tcolorbox}[colback=blue!5,colframe=blue!75!black,title= struct.h]
+		\lstinputlisting{src/struct.h}
+	\end{tcolorbox}
+\end{document}
