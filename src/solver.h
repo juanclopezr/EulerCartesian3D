@@ -1,4 +1,5 @@
 int transform_U(U_grid *U, int pos_x, int pos_y, int pos_z, int prop);
+int index(U_grid *U, int pos_x, int pos_y, int pos_z)
 FLOAT extract_rho(U_grid *U, int pos_x, int pos_y, int pos_z);
 FLOAT extract_u(U_grid *U, int pos_x, int pos_y, int pos_z, FLOAT rho);
 FLOAT extract_v(U_grid *U, int pos_x, int pos_y, int pos_z, FLOAT rho);

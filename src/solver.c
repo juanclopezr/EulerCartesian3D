@@ -13,37 +13,37 @@ int transform_U(U_grid *U, int pos_x, int pos_y, int pos_z, int prop)
 //Extracts the value of rho for a given cell
 FLOAT extract_rho(U_grid *U, int pos_x, int pos_y, int pos_z)
 {
-	return U->U[transform_U(U,pos_x,pos_y,pos_z,0)];
+	return U->U[transform_U(U,pos_x,pos_y,pos_z, 0)];
 }
 
 //Extracts the value of u for a given cell
 FLOAT extract_u(U_grid *U, int pos_x, int pos_y, int pos_z, FLOAT rho)
 {
-	return U->U[transform_U(U,pos_x,pos_y,pos_z,1)]/rho;
+	return U->U[transform_U(U,pos_x,pos_y,pos_z, 1)]/rho;
 }
 
 //Extracts the value of v for a given cell
 FLOAT extract_v(U_grid *U, int pos_x, int pos_y, int pos_z, FLOAT rho)
 {
-	return U->U[transform_U(U,pos_x,pos_y,pos_z,2)]/rho;
+	return U->U[transform_U(U,pos_x,pos_y,pos_z, 2)]/rho;
 }
 
 //Extracts the value of w for a given cell
 FLOAT extract_w(U_grid *U, int pos_x, int pos_y, int pos_z, FLOAT rho)
 {
-	return U->U[transform_U(U,pos_x,pos_y,pos_z,3)]/rho;
+	return U->U[transform_U(U,pos_x,pos_y,pos_z, 3)]/rho;
 }
 
 //Extracts the value of E for a given cell
 FLOAT extract_E(U_grid *U, int pos_x, int pos_y, int pos_z, FLOAT rho)
 {
-	return U->U[transform_U(U,pos_x,pos_y,pos_z,4)]/rho;
+	return U->U[transform_U(U,pos_x,pos_y,pos_z, 4)]/rho;
 }
 
 //Calculates the value of e
 FLOAT calce(FLOAT E, FLOAT u, FLOAT v, FLOAT w)
 {
-	return E - 0.5*(u*u+v*v+w*w);
+	return E - 0.5*(pow(u, 2) + pow(v, 2) + pow(w, 2));
 }
 
 //Calculates the value of p
@@ -68,15 +68,14 @@ FLOAT calcs(FLOAT h)
 FLOAT calcsps(U_grid *U)
 {
 	FLOAT sps_max = 0;
-	FLOAT temp,E,u,v,w,e,p,rho;
-	int i,j,k;
-	for(i=0;i<U->N_x;i++)
+	FLOAT temp, E, u, v, w, e, p, rho;
+	int i, j, k;
+	for(i=0; i<U->N_x; i++)
 	{
-		for(j=0;j<U->N_y;j++)
+		for(j=0; j<U->N_y; j++)
 		{
-			for(k=0;k<U->N_z;k++)
+			for(k=0; k<U->N_z; k++)
 			{
-				
 				rho = extract_rho(U,i,j,k);
 				E = extract_E(U,i,j,k,rho);
 				u = extract_u(U,i,j,k,rho);
@@ -85,7 +84,7 @@ FLOAT calcsps(U_grid *U)
 				e = calce(E,u,v,w);
 				p = calcp(rho,e);
                 
-                printf("%f %f %f %f %f %f %f\n", rho, E, u, v, w, e, p);
+                //printf("%f %f %f %f %f %f %f\n", rho, E, u, v, w, e, p);
 				temp = 0;
 				if(u>temp)
 				{
@@ -107,6 +106,7 @@ FLOAT calcsps(U_grid *U)
 			}
 		}
 	}
+    //printf("%f\n", sps_max);
 	return sps_max;
 }
 
@@ -136,15 +136,15 @@ void calcF(F_grid *F, U_grid *U, int pos_x, int pos_y, int pos_z)
 	F->F[transform_F(F,pos_x,pos_y,pos_z,0,0)] = rho*u;
 	F->F[transform_F(F,pos_x,pos_y,pos_z,1,0)] = rho*v;
 	F->F[transform_F(F,pos_x,pos_y,pos_z,2,0)] = rho*w;
-	F->F[transform_F(F,pos_x,pos_y,pos_z,0,1)] = rho*u*u+p;
+	F->F[transform_F(F,pos_x,pos_y,pos_z,0,1)] = rho*pow(u, 2) + p;
 	F->F[transform_F(F,pos_x,pos_y,pos_z,1,1)] = rho*u*v;
 	F->F[transform_F(F,pos_x,pos_y,pos_z,2,1)] = rho*u*w;
 	F->F[transform_F(F,pos_x,pos_y,pos_z,0,2)] = rho*u*v;
-	F->F[transform_F(F,pos_x,pos_y,pos_z,1,2)] = rho*v*v+p;
+	F->F[transform_F(F,pos_x,pos_y,pos_z,1,2)] = rho*pow(v, 2) + p;
 	F->F[transform_F(F,pos_x,pos_y,pos_z,2,2)] = rho*v*w;
 	F->F[transform_F(F,pos_x,pos_y,pos_z,0,3)] = rho*u*w;
 	F->F[transform_F(F,pos_x,pos_y,pos_z,1,3)] = rho*v*w;
-	F->F[transform_F(F,pos_x,pos_y,pos_z,2,3)] = rho*w*w+p;
+	F->F[transform_F(F,pos_x,pos_y,pos_z,2,3)] = rho*pow(w, 2) + p;
 	F->F[transform_F(F,pos_x,pos_y,pos_z,0,4)] = rho*(E+p/rho)*u;
 	F->F[transform_F(F,pos_x,pos_y,pos_z,1,4)] = rho*(E+p/rho)*v;
 	F->F[transform_F(F,pos_x,pos_y,pos_z,2,4)] = rho*(E+p/rho)*w;

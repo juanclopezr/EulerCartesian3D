@@ -16,7 +16,7 @@ void init_cond(U_grid *U)
             }
         }
     }
-	U->U[transform_U(U,(U->N_x-1)/2,(U->N_y-1)/2,(U->N_z-1)/2, 4)] = RHO*1e13;
+	U->U[transform_U(U,(U->N_x-1)/2,(U->N_y-1)/2,(U->N_z-1)/2, 4)] = RHO*1e6;
 }
 
 //Run the whole simulation

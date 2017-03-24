@@ -6,8 +6,8 @@
 #define SEDOV 1
 #define NDIM 3
 
-#define PRESSURE 1.0
-#define RHO 10.0
+#define PRESSURE 1e5
+#define RHO 1.0
 #define VX 2.0
 #define VY 3.0
 #define VZ 4.0
