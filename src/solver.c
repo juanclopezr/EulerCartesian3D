@@ -106,7 +106,7 @@ FLOAT calcsps(U_grid *U)
 			}
 		}
 	}
-    //printf("%f\n", sps_max);
+    printf("%f\n", sps_max);
 	return sps_max;
 }
 
@@ -185,7 +185,14 @@ void newU(U_grid *U, F_grid *F, physics_grid *P, int pos_x, int pos_y, int pos_z
 		exit(0);
 	}
 	int i;
-	if(pos_x > 0 && pos_x < F->N_x)
+	
+	/*
+	 * Error might be here.
+	 * Posible reasons include:
+	 * -> Interpolation scheme
+	 * -> Bad if cases
+	 */
+	if(pos_x > 0 && pos_x < F->N_x) //middle case
 	{
 		for(i=0;i<NDIM+2;i++)
 		{
@@ -193,7 +200,7 @@ void newU(U_grid *U, F_grid *F, physics_grid *P, int pos_x, int pos_y, int pos_z
 			F_phjk[i] = (-F->F[transform_F(F,pos_x-1,pos_y,pos_z,0,i)]+6*F->F[transform_F(F,pos_x,pos_y,pos_z,0,i)]+3*F->F[transform_F(F,pos_x+1,pos_y,pos_z,0,i)]);
 		}
 	}
-	else if(pos_x == 0)
+	else if(pos_x == 0) //lower corner case
 	{
 		for(i=0;i<NDIM+2;i++)
 		{
@@ -201,7 +208,7 @@ void newU(U_grid *U, F_grid *F, physics_grid *P, int pos_x, int pos_y, int pos_z
 			F_phjk[i] = (6*F->F[transform_F(F,pos_x,pos_y,pos_z,0,i)]+3*F->F[transform_F(F,pos_x+1,pos_y,pos_z,0,i)]);
 		}
 	}
-	else if(pos_x == F->N_x)
+	else if(pos_x == F->N_x) //higher corner case
 	{
 		for(i=0;i<NDIM+2;i++)
 		{

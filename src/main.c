@@ -5,7 +5,6 @@
 #include "solver.h"
 #include "problem.h"
 
-
 int main(int argc, char **argv){
     physics_grid * P_state;
     U_grid * U_state;
@@ -17,8 +16,8 @@ int main(int argc, char **argv){
 
     init_problem(P_state, U_state, F_state, SEDOV);
     init_cond(U_state);
-    prob_solve(U_state, F_state, P_state, 0.1);
-    print_L(P_state);
+    prob_solve(U_state, F_state, P_state, 0.01);
+    //print_L(P_state);
 
     return 0;
 }

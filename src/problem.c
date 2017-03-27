@@ -16,7 +16,7 @@ void init_cond(U_grid *U)
             }
         }
     }
-	U->U[transform_U(U,(U->N_x-1)/2,(U->N_y-1)/2,(U->N_z-1)/2, 4)] = RHO*1e6;
+	U->U[transform_U(U,(U->N_x-1)/2,(U->N_y-1)/2,(U->N_z-1)/2, 4)] = RHO*1e5;
 }
 
 //Run the whole simulation
@@ -49,7 +49,7 @@ void prob_solve(U_grid *U, F_grid *F, physics_grid *P, FLOAT T)
 				}
 			}
 		}
-		printf("%f %f\n", t, dt);
+		//printf("%f %f\n", t, dt);
 		t += dt;
 	}
 }
