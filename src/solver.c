@@ -221,24 +221,24 @@ void newU(U_grid *U, F_grid *F, physics_grid *P, int pos_x, int pos_y, int pos_z
 	{
 		for(i=0;i<NDIM+2;i++)
 		{
-			F_inhk[i] = (-F->F[transform_F(F,pos_x,pos_y+1,pos_z,0,i)]+6*F->F[transform_F(F,pos_x,pos_y,pos_z,0,i)]+3*F->F[transform_F(F,pos_x,pos_y-1,pos_z,0,i)]);
-			F_iphk[i] = (-F->F[transform_F(F,pos_x,pos_y-1,pos_z,0,i)]+6*F->F[transform_F(F,pos_x,pos_y,pos_z,0,i)]+3*F->F[transform_F(F,pos_x,pos_y+1,pos_z,0,i)]);
+			F_inhk[i] = (-F->F[transform_F(F,pos_x,pos_y+1,pos_z,1,i)]+6*F->F[transform_F(F,pos_x,pos_y,pos_z,1,i)]+3*F->F[transform_F(F,pos_x,pos_y-1,pos_z,1,i)]);
+			F_iphk[i] = (-F->F[transform_F(F,pos_x,pos_y-1,pos_z,1,i)]+6*F->F[transform_F(F,pos_x,pos_y,pos_z,1,i)]+3*F->F[transform_F(F,pos_x,pos_y+1,pos_z,1,i)]);
 		}
 	}
 	else if(pos_y == 0)
 	{
 		for(i=0;i<NDIM+2;i++)
 		{
-			F_inhk[i] = (-F->F[transform_F(F,pos_x,pos_y+1,pos_z,0,i)]+6*F->F[transform_F(F,pos_x,pos_y,pos_z,0,i)]);
-			F_iphk[i] = (6*F->F[transform_F(F,pos_x,pos_y,pos_z,0,i)]+3*F->F[transform_F(F,pos_x,pos_y+1,pos_z,0,i)]);
+			F_inhk[i] = (-F->F[transform_F(F,pos_x,pos_y+1,pos_z,1,i)]+6*F->F[transform_F(F,pos_x,pos_y,pos_z,1,i)]);
+			F_iphk[i] = (6*F->F[transform_F(F,pos_x,pos_y,pos_z,1,i)]+3*F->F[transform_F(F,pos_x,pos_y+1,pos_z,1,i)]);
 		}
 	}
 	else if(pos_y == F->N_y)
 	{
 		for(i=0;i<NDIM+2;i++)
 		{
-			F_inhk[i] = (6*F->F[transform_F(F,pos_x,pos_y,pos_z,0,i)]+3*F->F[transform_F(F,pos_x,pos_y-1,pos_z,0,i)]);
-			F_iphk[i] = (-F->F[transform_F(F,pos_x,pos_y-1,pos_z,0,i)]+6*F->F[transform_F(F,pos_x,pos_y,pos_z,0,i)]);
+			F_inhk[i] = (6*F->F[transform_F(F,pos_x,pos_y,pos_z,1,i)]+3*F->F[transform_F(F,pos_x,pos_y-1,pos_z,1,i)]);
+			F_iphk[i] = (-F->F[transform_F(F,pos_x,pos_y-1,pos_z,1,i)]+6*F->F[transform_F(F,pos_x,pos_y,pos_z,1,i)]);
 		}
 	}
 	
@@ -246,24 +246,24 @@ void newU(U_grid *U, F_grid *F, physics_grid *P, int pos_x, int pos_y, int pos_z
 	{
 		for(i=0;i<NDIM+2;i++)
 		{
-			F_ijnh[i] = (-F->F[transform_F(F,pos_x,pos_y,pos_z+1,0,i)]+6*F->F[transform_F(F,pos_x,pos_y,pos_z,0,i)]+3*F->F[transform_F(F,pos_x,pos_y,pos_z-1,0,i)]);
-			F_ijph[i] = (-F->F[transform_F(F,pos_x,pos_y,pos_z-1,0,i)]+6*F->F[transform_F(F,pos_x,pos_y,pos_z,0,i)]+3*F->F[transform_F(F,pos_x,pos_y,pos_z+1,0,i)]);
+			F_ijnh[i] = (-F->F[transform_F(F,pos_x,pos_y,pos_z+1,2,i)]+6*F->F[transform_F(F,pos_x,pos_y,pos_z,2,i)]+3*F->F[transform_F(F,pos_x,pos_y,pos_z-1,2,i)]);
+			F_ijph[i] = (-F->F[transform_F(F,pos_x,pos_y,pos_z-1,2,i)]+6*F->F[transform_F(F,pos_x,pos_y,pos_z,2,i)]+3*F->F[transform_F(F,pos_x,pos_y,pos_z+1,2,i)]);
 		}
 	}
 	else if(pos_z == 0)
 	{
 		for(i=0;i<NDIM+2;i++)
 		{
-			F_ijnh[i] = (-F->F[transform_F(F,pos_x,pos_y,pos_z+1,0,i)]+6*F->F[transform_F(F,pos_x,pos_y,pos_z,0,i)]);
-			F_ijph[i] = (6*F->F[transform_F(F,pos_x,pos_y,pos_z,0,i)]+3*F->F[transform_F(F,pos_x,pos_y,pos_z+1,0,i)]);
+			F_ijnh[i] = (-F->F[transform_F(F,pos_x,pos_y,pos_z+1,2,i)]+6*F->F[transform_F(F,pos_x,pos_y,pos_z,2,i)]);
+			F_ijph[i] = (6*F->F[transform_F(F,pos_x,pos_y,pos_z,2,i)]+3*F->F[transform_F(F,pos_x,pos_y,pos_z+1,2,i)]);
 		}
 	}
 	else if(pos_z == F->N_z)
 	{
 		for(i=0;i<NDIM+2;i++)
 		{
-			F_ijnh[i] = (6*F->F[transform_F(F,pos_x,pos_y,pos_z,0,i)]+3*F->F[transform_F(F,pos_x,pos_y,pos_z-1,0,i)]);
-			F_ijph[i] = (-F->F[transform_F(F,pos_x,pos_y,pos_z-1,0,i)]+6*F->F[transform_F(F,pos_x,pos_y,pos_z,0,i)]);
+			F_ijnh[i] = (6*F->F[transform_F(F,pos_x,pos_y,pos_z,2,i)]+3*F->F[transform_F(F,pos_x,pos_y,pos_z-1,2,i)]);
+			F_ijph[i] = (-F->F[transform_F(F,pos_x,pos_y,pos_z-1,2,i)]+6*F->F[transform_F(F,pos_x,pos_y,pos_z,2,i)]);
 		}
 	}
 	
