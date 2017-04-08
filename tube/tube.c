@@ -46,14 +46,14 @@ int main(int argc, char **argv)
     up = check_at + 1;
     
     //if animation is wanted
-    char name[100];
-    int j = 0;
+    //char name[100];
+    //int j = 0;
     
     max_speed = 2.4; //NO IDEA
     while(check < 0.1)
     {
         
-        sprintf(name, "%d_data.dat", j); // if animation is wanted
+        //sprintf(name, "%d_data.dat", j); // if animation is wanted
         for(i = 1; i<N-1; i++)
         {
             lax(i, dt, dx, t_density, t_speed, t_energy, t_pressure);
@@ -74,14 +74,14 @@ int main(int argc, char **argv)
         {
             max_speed = 1;
         }
-        print_tube(name); // if animation is wanted
+        //print_tube(name); // if animation is wanted
         check = pressure[low] - pressure[up];
         if(dx/max_speed > dt)
         {
             dt = dx/max_speed;
         }
         t += dt;
-        j += 1;
+        //j += 1;
     }
     print_tube("tube.dat");
     
