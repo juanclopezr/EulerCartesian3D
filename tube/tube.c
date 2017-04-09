@@ -1,22 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
-#define FLOAT double
-#define N 1000
-#define GAMMA 1.4
-#define CFL 0.75
-
-FLOAT *linspace(FLOAT init, FLOAT last, FLOAT steps);
-FLOAT calculate_pressure(FLOAT energy, FLOAT density, FLOAT speed);
-FLOAT calculate_energy(FLOAT pressure, FLOAT density, FLOAT speed);
-void init_tube(FLOAT *energy, FLOAT *density, FLOAT *speed, FLOAT *pressure, FLOAT *space);
-void lax(int pos, FLOAT dt, FLOAT dx, FLOAT *t_density, FLOAT *t_speed, FLOAT *t_energy, FLOAT *t_pressure);
-void print_tube(const char *name);
-
-FLOAT *calc_F(FLOAT *U);
-FLOAT *calc_U(FLOAT rho, FLOAT v, FLOAT e);
-FLOAT *density, *speed, *pressure, *energy, *x;
+#include "tube.h"
 
 int main(int argc, char **argv)
 {
@@ -36,7 +21,7 @@ int main(int argc, char **argv)
     
     init_tube(energy, density, speed, pressure, x);
     
-    FLOAT dx, max_speed, abs_speed, check = 0;
+    FLOAT dx, max_speed, abs_speed, check = 0, sound_speed;
     dx = x[1] - x[0];
     int check_at = 0.9/dx, low, up;
     
@@ -49,42 +34,34 @@ int main(int argc, char **argv)
     //char name[100];
     //int j = 0;
     
-    max_speed = 2.4; //NO IDEA
     while(check < 0.1)
     {
-        
         //sprintf(name, "%d_data.dat", j); // if animation is wanted
         for(i = 1; i<N-1; i++)
         {
             lax(i, dt, dx, t_density, t_speed, t_energy, t_pressure);
         }
+        max_speed = 0;
         for(i = 1; i<N-1; i++)
         {
             density[i] = t_density[i];
             speed[i] = t_speed[i];
             energy[i] = t_energy[i];
             pressure[i] = t_pressure[i];
-            abs_speed = fabs(speed[i]);
-            if(abs_speed > max_speed)
+            sound_speed = sqrt(GAMMA*pressure[i]/density[i]);
+            if(sound_speed + speed[i] > max_speed)
             {
-                max_speed = speed[i];
+                max_speed = sound_speed + speed[i];
             }
         }
-        if(max_speed == 0)
-        {
-            max_speed = 1;
-        }
-        //print_tube(name); // if animation is wanted
-        check = pressure[low] - pressure[up];
-        if(dx/max_speed > dt)
-        {
-            dt = dx/max_speed;
-        }
+        dt = dx/max_speed;
         t += dt;
+        //print_tube(name, t); // if animation is wanted
+        check = pressure[low] - pressure[up];
+        
         //j += 1;
     }
-    print_tube("tube.dat");
-    
+    print_tube("tube.dat", t);
     free(x); 
     free(energy); free(density); free(speed); free(pressure);
     free(t_energy); free(t_density); free(t_speed); free(t_pressure);
@@ -123,17 +100,17 @@ void init_tube(FLOAT *energy, FLOAT *density, FLOAT *speed, FLOAT *pressure, FLO
     for(i=0; i<N; i++)
     {
         x = space[i];
-        if(x <= 0.5)
+        if(x <= X0)
         {
-            density[i] = 1.0;
-            pressure[i] = 1.0;
+            density[i] = RHO1;
+            pressure[i] = P1;
         }
         else
         {
-            density[i] = 0.1;
-            pressure[i] = 0.1;
+            density[i] = RHO5;
+            pressure[i] = P5;
         }
-        speed[i] = 0;
+        speed[i] = U1;
         energy[i] = calculate_energy(pressure[i], density[i], speed[i]);
     }
 }
@@ -173,7 +150,6 @@ void lax(int pos, FLOAT dt, FLOAT dx, FLOAT *t_density, FLOAT *t_speed, FLOAT *t
     FLOAT ratio = dt/dx;
     FLOAT *U, *U_before, *half1, *half2, *U_next;
     FLOAT *F, *F_before, *F_half1, *F_half2, *F_next;
-    //printf("%f\n", ratio);
     
     half1 = malloc(3*sizeof(FLOAT));
     half2 = malloc(3*sizeof(FLOAT));
@@ -206,22 +182,25 @@ void lax(int pos, FLOAT dt, FLOAT dx, FLOAT *t_density, FLOAT *t_speed, FLOAT *t
     t_energy[pos] = U[2];
     t_pressure[pos] = calculate_pressure(U[2], U[0], U[1]);
     
-    free(U);
-    free(U_next);
-    free(U_before);
-    free(F);
-    free(F_next);
-    free(F_before);
-    free(half1);
-    free(half2);
-    free(F_half1);
+    free(U); free(U_next); free(U_before);
+    free(F); free(F_next); free(F_before);
+    free(half1); free(half2); free(F_half1);
     free(F_half2);
 }
 
-void print_tube(const char *name)
+void print_tube(const char *name, double t)
 {
     int i;
     FILE *output = fopen(name, "w");
+    fprintf(output, "gamma = %f\n", GAMMA);
+    fprintf(output, "rho1 = %f\n", RHO1);
+    fprintf(output, "rho5 = %f\n", RHO5);
+    fprintf(output, "u1 = %f\n", U1);
+    fprintf(output, "u5 = %f\n", U1);
+    fprintf(output, "p1 = %f\n", P1);
+    fprintf(output, "p5 = %f\n", P5);
+    fprintf(output, "t = %f\n", t);
+    fprintf(output, "x0 = %f\n", X0);
     for(i=0; i<N; i++)
     {
         fprintf(output, "%f %f %f %f %f\n", x[i], energy[i], density[i], speed[i], pressure[i]);
