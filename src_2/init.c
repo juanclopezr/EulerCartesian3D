@@ -62,36 +62,36 @@ F_grid * create_F_grid(void){
   return G;
 }
 
-// U_vector * create_U_vector(void){
-//     U_vector *U;
-//     if(!(U = malloc(sizeof(U_vector)))){
-//       fprintf(stderr, "Problem with data allocation\n");fflush(stdout);
-//       exit(0);
-//     }
-//     U->components = malloc((NDIM + 2)*sizeof(FLOAT));
-//     init_to_zero(U->components, (NDIM + 2));
-//     return U;
-// }
-//
-// F_vector * create_F_vector(void){
-//     F_vector *F;
-//     if(!(F = malloc(sizeof(F_vector)))){
-//       fprintf(stderr, "Problem with data allocation\n");fflush(stdout);
-//       exit(0);
-//     }
-//     F->components = malloc((NDIM + 2)*sizeof(FLOAT));
-//     init_to_zero(F->components, (NDIM + 2));
-//     return F;
-// }
+U_vector * create_U_vector(void){
+    U_vector *U;
+    if(!(U = malloc(sizeof(U_vector)))){
+      fprintf(stderr, "Problem with data allocation\n");fflush(stdout);
+      exit(0);
+    }
+    U->components = malloc((NDIM + 2)*sizeof(FLOAT));
+    init_to_zero(U->components, (NDIM + 2));
+    return U;
+}
 
-// physics_cell * create_P_vector(void){
-//     physics_cell *P;
-//     if(!(P = malloc(sizeof(physics_cell)))){
-//       fprintf(stderr, "Problem with data allocation\n");fflush(stdout);
-//       exit(0);
-//     }
-//     return P;
-// }
+F_vector * create_F_vector(void){
+    F_vector *F;
+    if(!(F = malloc(sizeof(F_vector)))){
+      fprintf(stderr, "Problem with data allocation\n");fflush(stdout);
+      exit(0);
+    }
+    F->components = malloc((NDIM + 2)*sizeof(FLOAT));
+    init_to_zero(F->components, (NDIM + 2));
+    return F;
+}
+
+physics_cell * create_P_vector(void){
+    physics_cell *P;
+    if(!(P = malloc(sizeof(physics_cell)))){
+      fprintf(stderr, "Problem with data allocation\n");fflush(stdout);
+      exit(0);
+    }
+    return P;
+}
 
 void init_problem(physics_grid *P, U_grid *U1, U_grid *U2, F_grid *F, int problem){
 
@@ -101,9 +101,9 @@ void init_problem(physics_grid *P, U_grid *U1, U_grid *U2, F_grid *F, int proble
     P->delta_x = 10.0;
     P->delta_y = 10.0;
     P->delta_z = 10.0;
-    // P->delta_x = 25.0;
-    // P->delta_y = 25.0;
-    // P->delta_z = 25.0;
+    // P->delta_x = 2.0;
+    // P->delta_y = 2.0;
+    // P->delta_z = 2.0;
     P->N_x = (int)(P->L_x/P->delta_x);
     P->N_y = (int)(P->L_y/P->delta_y);
     P->N_z = (int)(P->L_z/P->delta_z);
@@ -157,27 +157,27 @@ void init_problem(physics_grid *P, U_grid *U1, U_grid *U2, F_grid *F, int proble
     int i;
     for(i = 0; i<U1->N_cells; i++)
     {
-        // U_vector *U_ = malloc(sizeof(U_vector));
-        // U_vector *U__ = malloc(sizeof(U_vector));
-        // F_vector *Fx = malloc(sizeof(F_vector)), \
-        //     *Fy = malloc(sizeof(F_vector)), *Fz = malloc(sizeof(F_vector));
-        // physics_cell *P_ = malloc(sizeof(physics_cell));
-        // U_vector *U_ = create_U_vector();
-        // U_vector *U__ = create_U_vector();
-        // physics_cell *P_ = create_P_vector();
-        // F_vector *Fx = create_F_vector(), *Fy = create_F_vector(), *Fz = create_F_vector();
+    //     // U_vector *U_ = malloc(sizeof(U_vector));
+    //     // U_vector *U__ = malloc(sizeof(U_vector));
+    //     // F_vector *Fx = malloc(sizeof(F_vector)), *Fy = malloc(sizeof(F_vector)), *Fz = malloc(sizeof(F_vector));
+    //     // physics_cell *P_ = malloc(sizeof(physics_cell));
+    //     // U_vector *U_ = create_U_vector();
+    //     // U_vector *U__ = create_U_vector();
+    //     // physics_cell *P_ = create_P_vector();
+    //     // F_vector *Fx = create_F_vector(), *Fy = create_F_vector(), *Fz = create_F_vector();
         U1->U[i].components = malloc((NDIM+2)*sizeof(FLOAT));
         U2->U[i].components = malloc((NDIM+2)*sizeof(FLOAT));
         F->F_x[i].components = malloc((NDIM+2)*sizeof(FLOAT));
         F->F_y[i].components = malloc((NDIM+2)*sizeof(FLOAT));
         F->F_z[i].components = malloc((NDIM+2)*sizeof(FLOAT));
-        // U1->U[i] = *U_;
-        // U2->U[i] = *U__;
-        // P->P[i] = *P_;
-        // F->F_x[i] = *Fx;
-        // F->F_y[i] = *Fy;
-        // F->F_z[i] = *Fz;
+    //     // U1->U[i] = *U_;
+    //     // U2->U[i] = *U__;
+    //     // P->P[i] = *P_;
+    //     // F->F_x[i] = *Fx;
+    //     // F->F_y[i] = *Fy;
+    //     // F->F_z[i] = *Fz;
     }
+
 }
 
 FLOAT calculateThermalEnergy(physics_grid *P)
@@ -201,7 +201,7 @@ void destruct_F_vector(F_vector *F)
 void destruct_grids(physics_grid *P, U_grid *U1, U_grid *U2, F_grid *F)
 {
     int i;
-    for(i=0; i>P->N_cells; i++)
+    for(i=0; i<P->N_cells; i++)
     {
         free(U1->U[i].components);
         free(U2->U[i].components);

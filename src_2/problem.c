@@ -47,12 +47,11 @@ void init_cond(physics_grid *P, U_grid *U, F_grid *F)
             }
         }
     }
-    // free(P_);
+    free(P_);
     // destruct_U_vector(U_);
     // destruct_F_vector(F_x);
     // destruct_F_vector(F_y);
     // destruct_F_vector(F_z);
-
 }
 
 void solve_SEDOV(physics_grid *P, U_grid *U, U_grid *U_temp, F_grid *F)
@@ -60,12 +59,14 @@ void solve_SEDOV(physics_grid *P, U_grid *U, U_grid *U_temp, F_grid *F)
     FLOAT T, dt, speed;
     T = 0;
     dt = 1e-6;
-    while (T < 5e-5)
+    int i = 0;
+    while (i < 5)
     {
         speed = calculateNextU(P, U_temp, U, dt);
         dt = P->delta_x/speed;
         T += dt;
         printf("%f\n", T);
+        i += 1;
     }
     updatePhysics(P, U);
 }

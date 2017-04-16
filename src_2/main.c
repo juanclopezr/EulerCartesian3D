@@ -24,7 +24,7 @@ int main(int argc, char **argv){
     Nz = P_state->N_z;
 
     init_cond(P_state, U_state, F_state);
-    // solve_SEDOV(P_state, U_state, U_temp, F_state);
+    solve_SEDOV(P_state, U_state, U_temp, F_state);
 
     print_E(P_state);
 
