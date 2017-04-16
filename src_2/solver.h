@@ -8,12 +8,12 @@ FLOAT calcs(FLOAT h);
 FLOAT absolute(FLOAT value);
 FLOAT max_speed(U_vector *U);
 
-void fromU_calcP(U_vector *U, physics_cell *P);
-void fromP_calcU(physics_cell *P, U_vector *U);
-void fromU_calcFx(U_vector *U, F_vector *F);
-void fromU_calcFy(U_vector *U, F_vector *F);
-void fromU_calcFz(U_vector *U, F_vector *F);
-void fromU_calcF(U_vector *U, F_vector *Fx, F_vector *Fy, F_vector *Fz);
+void fromU_calcP(U_vector U, physics_cell *P);
+void fromP_calcU(physics_cell P, U_vector *U);
+void fromU_calcFx(U_vector U, F_vector *F);
+void fromU_calcFy(U_vector U, F_vector *F);
+void fromU_calcFz(U_vector U, F_vector *F);
+void fromU_calcF(U_vector U, F_vector *Fx, F_vector *Fy, F_vector *Fz);
 
 F_vector *calculateF_half(U_grid *U, int i, int j, int k, int i_, int j_, int k_);
 U_vector *calculateU_half(U_vector *U1, U_vector *U2);

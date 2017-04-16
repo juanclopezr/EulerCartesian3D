@@ -98,12 +98,9 @@ void init_problem(physics_grid *P, U_grid *U1, U_grid *U2, F_grid *F, int proble
     P->L_x = 250.0;
     P->L_y = 250.0;
     P->L_z = 250.0;
-    P->delta_x = 10.0;
-    P->delta_y = 10.0;
-    P->delta_z = 10.0;
-    // P->delta_x = 2.0;
-    // P->delta_y = 2.0;
-    // P->delta_z = 2.0;
+    P->delta_x = 2.0;
+    P->delta_y = 2.0;
+    P->delta_z = 2.0;
     P->N_x = (int)(P->L_x/P->delta_x);
     P->N_y = (int)(P->L_y/P->delta_y);
     P->N_z = (int)(P->L_z/P->delta_z);
@@ -155,7 +152,7 @@ void init_problem(physics_grid *P, U_grid *U1, U_grid *U2, F_grid *F, int proble
     }
 
     int i;
-    for(i = 0; i<U1->N_cells; i++)
+    for(i = 0; i<P->N_cells; i++)
     {
     //     // U_vector *U_ = malloc(sizeof(U_vector));
     //     // U_vector *U__ = malloc(sizeof(U_vector));
@@ -203,11 +200,15 @@ void destruct_grids(physics_grid *P, U_grid *U1, U_grid *U2, F_grid *F)
     int i;
     for(i=0; i<P->N_cells; i++)
     {
-        free(U1->U[i].components);
-        free(U2->U[i].components);
-        free(F->F_x[i].components);
-        free(F->F_y[i].components);
-        free(F->F_z[i].components);
+        if(i!=P->N_cells)
+        {
+            free(U1->U[i].components);
+            free(U2->U[i].components);
+            free(F->F_x[i].components);
+            free(F->F_y[i].components);
+            free(F->F_z[i].components);
+        }
+
     }
     free(U1->U);
     free(U2->U);
