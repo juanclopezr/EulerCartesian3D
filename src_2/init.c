@@ -154,25 +154,11 @@ void init_problem(physics_grid *P, U_grid *U1, U_grid *U2, F_grid *F, int proble
     int i;
     for(i = 0; i<P->N_cells; i++)
     {
-    //     // U_vector *U_ = malloc(sizeof(U_vector));
-    //     // U_vector *U__ = malloc(sizeof(U_vector));
-    //     // F_vector *Fx = malloc(sizeof(F_vector)), *Fy = malloc(sizeof(F_vector)), *Fz = malloc(sizeof(F_vector));
-    //     // physics_cell *P_ = malloc(sizeof(physics_cell));
-    //     // U_vector *U_ = create_U_vector();
-    //     // U_vector *U__ = create_U_vector();
-    //     // physics_cell *P_ = create_P_vector();
-    //     // F_vector *Fx = create_F_vector(), *Fy = create_F_vector(), *Fz = create_F_vector();
         U1->U[i].components = malloc((NDIM+2)*sizeof(FLOAT));
         U2->U[i].components = malloc((NDIM+2)*sizeof(FLOAT));
         F->F_x[i].components = malloc((NDIM+2)*sizeof(FLOAT));
         F->F_y[i].components = malloc((NDIM+2)*sizeof(FLOAT));
         F->F_z[i].components = malloc((NDIM+2)*sizeof(FLOAT));
-    //     // U1->U[i] = *U_;
-    //     // U2->U[i] = *U__;
-    //     // P->P[i] = *P_;
-    //     // F->F_x[i] = *Fx;
-    //     // F->F_y[i] = *Fy;
-    //     // F->F_z[i] = *Fz;
     }
 
 }

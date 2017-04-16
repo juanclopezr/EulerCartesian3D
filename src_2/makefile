@@ -1,5 +1,5 @@
 CC = gcc
-CC_OPTIONS = -g -O2 -Wall
+CC_OPTIONS = -g -O3 -Wall
 EXEC = euler.x
 LIBS = -lm
 

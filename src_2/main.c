@@ -27,7 +27,7 @@ int main(int argc, char **argv){
     init_cond(P_state, U_state, F_state);
     solve_SEDOV(P_state, U_state, U_temp, F_state);
 
-    print_E(P_state);
+    // print_E(P_state);
 
     destruct_grids(P_state, U_state, U_temp, F_state);
     return 0;

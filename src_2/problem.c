@@ -1,8 +1,10 @@
 #include "struct.h"
 #include "solver.h"
 #include "init.h"
+#include "io.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 //Gives the initial condition for the problem
 void init_cond(physics_grid *P, U_grid *U, F_grid *F)
@@ -13,6 +15,7 @@ void init_cond(physics_grid *P, U_grid *U, F_grid *F)
     U_vector U_;
     F_vector F_x, F_y, F_z;
     big_E = calculateThermalEnergy(P);
+    printf("%f\n", big_E);
 
     middle = transform3d(0.5*P->N_x, 0.5*P->N_y, 0.5*P->N_z);
     for(i = 0; i<P->N_x; i++)
@@ -29,7 +32,9 @@ void init_cond(physics_grid *P, U_grid *U, F_grid *F)
                 F_z = F->F_z[index];
                 P_.rho = RHO;
                 P_.p = PRESSURE;
-                P_.u = P_.v = P_.w = 0.0;
+                P_.u = VX;
+                P_.v = VY;
+                P_.w = VZ;
                 P_.E = big_E;
                 if (middle == index)
                 {
@@ -51,15 +56,22 @@ void solve_SEDOV(physics_grid *P, U_grid *U, U_grid *U_temp, F_grid *F)
 {
     FLOAT T, dt, speed;
     T = 0;
-    dt = 1e-6;
+    dt = 1e-7;
     int i = 0;
-    while (i < 10)
+    while (i < 200)
     {
-        speed = calculateNextU(P, U_temp, U, dt);
-        dt = P->delta_x/speed;
+        speed = calculateNextU(P, U, *U_temp, dt);
+        if(speed > 0)
+        {
+            dt = P->delta_x/speed;
+        }
         T += dt;
-        printf("%f %f\n", dt, speed);
+
+        printf("%.23f %f\n", T, speed);
+
+        updatePhysics(P, *U);
+        print_E(i, P);
         i += 1;
     }
-    updatePhysics(P, U);
+
 }
