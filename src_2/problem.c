@@ -67,7 +67,7 @@ void solve_SEDOV(physics_grid *P, U_grid *U, U_grid *U_temp, F_grid *F)
         }
         T += dt;
 
-        printf("%.23f %f\n", T, speed);
+        printf("%.12f %f\n", T, speed);
 
         updatePhysics(P, *U);
         print_E(i, P);

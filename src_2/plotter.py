@@ -18,7 +18,6 @@ files = glob("*.dat")
 number_files = len(files)
 
 data = [get_matrix("%d_energy.dat"%i) for i in range(number_files)]
-data[0][0,0] = 1e20
 im = ax.imshow(np.log10(data[0]),  cmap = 'jet')
 fig.colorbar(im)
 

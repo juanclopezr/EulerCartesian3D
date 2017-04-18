@@ -8,8 +8,15 @@
 // FLOAT calce(FLOAT E, FLOAT rho, FLOAT u, FLOAT v, FLOAT w)
 FLOAT calce(FLOAT E_rho, FLOAT u, FLOAT v, FLOAT w)
 {
-	// return E/rho - 0.5*(pow(u, 2) + pow(v, 2) + pow(w, 2));
-	return E_rho - 0.5*(pow(u, 2) + pow(v, 2) + pow(w, 2));
+	// return E_rho - 0.5*(pow(u, 2) + pow(v, 2) + pow(w, 2));
+	FLOAT speeds = 0.5*(pow(u, 2) + pow(v, 2) + pow(w, 2));
+	FLOAT ans = E_rho - speeds;
+	// if (ans > 0)
+	// {
+	// 	return ans;
+	// }
+	// printf("%f %f %f\n", E_rho, speeds, ans);
+	return ans;
 }
 
 //Calculates the pressure value
@@ -51,11 +58,10 @@ void fromU_calcP(U_vector U, physics_cell *P)
 {
 	FLOAT e;
 	P->rho = U.components[0];
-	P->E = U.components[4]/P->rho;
+	P->E = U.components[4];
 	P->u = U.components[1]/P->rho;
 	P->v = U.components[2]/P->rho;
 	P->w = U.components[3]/P->rho;
-	// e = calce(P->E, P->rho, P->u, P->v, P->w);
 	e = calce(P->E/P->rho, P->u, P->v, P->w);
 	P->p = calcp(P->rho, e);
 }
@@ -76,8 +82,6 @@ void fromU_calcFx(U_vector U, F_vector *F)
 	v = U.components[2]/U.components[0];
 	w = U.components[3]/U.components[0];
 	e = calce(U.components[4]/U.components[0], u, v, w);
-	// e = calce(U.components[4]/U.components[0], u, v, w);
-	// e = calce(U.components[4]/U.components[0], U.components[0], u, v, w);
 	p = calcp(U.components[0], e);
 	F->components[0] = U.components[1];
 	F->components[1] = U.components[1]*u + p;
@@ -93,12 +97,10 @@ void fromU_calcFy(U_vector U, F_vector *F)
 	v = U.components[2]/U.components[0];
 	w = U.components[3]/U.components[0];
 	e = calce(U.components[4]/U.components[0], u, v, w);
-	// e = calce(U.components[4]/U.components[0], u, v, w);
-	// e = calce(U.components[4]/U.components[0], U.components[0], u, v, w);
 	p = calcp(U.components[0], e);
 	F->components[0] = U.components[2];
 	F->components[1] = U.components[1]*v;
-	F->components[2] = U.components[2]*u + p;
+	F->components[2] = U.components[2]*v + p;
 	F->components[3] = U.components[3]*v;
 	F->components[4] = (U.components[4] + p)*v;
 }
@@ -110,8 +112,6 @@ void fromU_calcFz(U_vector U, F_vector *F)
 	v = U.components[2]/U.components[0];
 	w = U.components[3]/U.components[0];
 	e = calce(U.components[4]/U.components[0], u, v, w);
-	// e = calce(U.components[4]/U.components[0], u, v, w);
-	// e = calce(U.components[4]/U.components[0], U.components[0], u, v, w);
 	p = calcp(U.components[0], e);
 	F->components[0] = U.components[3];
 	F->components[1] = U.components[1]*w;
@@ -129,7 +129,6 @@ FLOAT max_speed(U_vector *U)
 	v = U->components[2]/rho;
 	w = U->components[3]/rho;
 	e = calce(E/rho, u, v, w);
-	// e = calce(E, rho, u, v, w);
 	p = calcp(rho, e);
 	cs = calcs(calch(E, p, rho));
 	u = absolute(u);
@@ -267,12 +266,12 @@ FLOAT calculateNextU(physics_grid *P, U_grid *U, U_grid U_temp, double dt)
 			for(k=0; k<U->N_z; k++)
 			{
 				index = transform3d(i, j, k);
-				Fxr = calculateF_half(U, i, j, k, 1, 0, 0);
-				Fxl = calculateF_half(U, i, j, k, -1, 0, 0);
-				Fyr = calculateF_half(U, i, j, k, 0, 1, 0);
-				Fyl = calculateF_half(U, i, j, k, 0, -1, 0);
-				Fzr = calculateF_half(U, i, j, k, 0, 0, 1);
-				Fzl = calculateF_half(U, i, j, k, 0, 0, -1);
+				Fxr = calculateF_half(U, i, j, k, -1, 0, 0);
+				Fxl = calculateF_half(U, i, j, k, 1, 0, 0);
+				Fyr = calculateF_half(U, i, j, k, 0, -1, 0);
+				Fyl = calculateF_half(U, i, j, k, 0, 1, 0);
+				Fzr = calculateF_half(U, i, j, k, 0, 0, -1);
+				Fzl = calculateF_half(U, i, j, k, 0, 0, 1);
 
 				Fx = calculateF_diff(*Fxr, *Fxl);
 				Fy = calculateF_diff(*Fyr, *Fyl);
@@ -285,7 +284,6 @@ FLOAT calculateNextU(physics_grid *P, U_grid *U, U_grid U_temp, double dt)
 				}
 
 				UV_temp = U_temp.U[index];
-				// UV_temp = U->U[index];
 				speed = max_speed(&UV_temp);
 				if(speed > max)
 				{

@@ -6,7 +6,7 @@
 #define SEDOV 1
 #define NDIM 3
 
-#define EXP_ENERGY 1e13 // J/kg
+#define EXP_ENERGY 1e10 // J/kg
 #define PRESSURE 101325.0 // Pa
 #define TEMPERATURE 300 // Kelvin
 #define RHO 1.0 // kg/m3
