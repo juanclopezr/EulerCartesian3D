@@ -58,6 +58,7 @@ void solve_SEDOV(physics_grid *P, U_grid *U, U_grid *U_temp, F_grid *F)
     T = 0;
     dt = 1e-7;
     int i = 0;
+    printf("%.12f\n",VX);
     while (i < 200)
     {
         speed = calculateNextU(P, U, *U_temp, dt);
@@ -65,6 +66,7 @@ void solve_SEDOV(physics_grid *P, U_grid *U, U_grid *U_temp, F_grid *F)
         {
             dt = P->delta_x/speed;
         }
+        //dt = P->delta_x/absolute(speed);
         T += dt;
 
         printf("%.12f %f\n", T, speed);
