@@ -6,8 +6,10 @@
 #define SEDOV 1
 #define NDIM 3
 
-#define EXP_ENERGY 1e10 // J/kg
-#define PRESSURE 101325.0 // Pa
+// #define EXP_ENERGY 1e10 // J/kg
+// #define PRESSURE 101325.0 // Pa
+#define EXP_ENERGY 1e2 // J/kg
+#define PRESSURE 1 // Pa
 #define TEMPERATURE 300 // Kelvin
 #define RHO 1.0 // kg/m3
 #define VX 0.0 // m/s
@@ -62,11 +64,9 @@ typedef struct physics_str{
 
 typedef struct U_vector_str{
     FLOAT *components;
-    // FLOAT *components[NDIM+2];
 } U_vector;
 
 typedef struct F_vector_str{
     FLOAT *components;
-    // FLOAT *components[NDIM+2];
 } F_vector;
 #endif

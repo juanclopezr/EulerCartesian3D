@@ -18,14 +18,15 @@ files = glob("*.dat")
 number_files = len(files)
 
 data = [get_matrix("%d_energy.dat"%i) for i in range(number_files)]
-im = ax.imshow(np.log10(data[0]),  cmap = 'jet')
-fig.colorbar(im)
-
+value = [sum(temp) for temp in data]
+#im = ax.imshow(np.log10(data[0]),  cmap = 'jet')
+# fig.colorbar(im)
+plt.plot(value)
 def animate(i):
 	global ax, data, im
 	im.set_data(np.log10(data[i]))
-	ax.set_xlabel("%d"%i)
+	ax.set_xlabel("%f"%np.log10(data[i][62, 62]))
 
-ani = FuncAnimation(fig, animate, frames = number_files, interval = 100)
+#ani = FuncAnimation(fig, animate, frames = number_files, interval = 100)
 # ani.save("explosion.gif", writer = 'imagemagick')
 plt.show()

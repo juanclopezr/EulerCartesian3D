@@ -16,4 +16,4 @@ all: $(EXEC)
 $(EXEC):$(OBJS)
 	$(CC) $(OBJS) $(LIBS) -o $(EXEC)
 clean:
-	rm -f $(OBJS) *~ core* ${EXEC}
+	rm -f $(OBJS) *~ core* ${EXEC} *.dat
