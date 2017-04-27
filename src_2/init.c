@@ -95,9 +95,9 @@ physics_cell * create_P_vector(void){
 
 void init_problem(physics_grid *P, U_grid *U1, U_grid *U2, F_grid *F, int problem){
 
-    P->L_x = 250.0;
-    P->L_y = 250.0;
-    P->L_z = 250.0;
+    P->L_x = 256.0;
+    P->L_y = 256.0;
+    P->L_z = 256.0;
     P->delta_x = 2.0;
     P->delta_y = 2.0;
     P->delta_z = 2.0;

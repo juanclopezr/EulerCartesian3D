@@ -24,4 +24,4 @@ F_vector *calculateF_diff(F_vector *F_plus, F_vector *F_minus);
 
 FLOAT calculateNextU(physics_grid *P, U_grid *U, U_grid U_temp, double dt);
 void updatePhysics(physics_grid *P, U_grid U);
-void fromUgrid_calcFgrid(U_grid Ugrid, F_grid Fgrid);
+FLOAT *calc_density(physics_grid P);

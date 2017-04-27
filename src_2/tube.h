@@ -8,6 +8,7 @@
 #define U1 0.0
 #define X0 0.5
 
+void solve_SOD();
 FLOAT *linspace(FLOAT init, FLOAT last, FLOAT steps);
 FLOAT calculate_pressure(FLOAT energy, FLOAT density, FLOAT speed);
 FLOAT calculate_energy(FLOAT pressure, FLOAT density, FLOAT speed);

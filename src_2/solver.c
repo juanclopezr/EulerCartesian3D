@@ -439,26 +439,34 @@ void updatePhysics(physics_grid *P, U_grid U)
 	}
 }
 
-void fromUgrid_calcFgrid(U_grid Ugrid, F_grid Fgrid)
+FLOAT *calc_density(physics_grid P)
 {
-	U_vector U;
-	F_vector Fx, Fy, Fz;
-
-	int i, j, k, index;
-	for(i=0; U->N_x; i++)
+	FLOAT *density = malloc(0.5*P.N_x*sizeof(FLOAT));
+	int i, j, k, l, i_c, j_c, k_c, index, contador;
+	FLOAT temp_density;
+	i_c = 0.5*P.N_x;
+	j_c = 0.5*P.N_x;
+	k_c = 0.5*P.N_x;
+	for(l=0; l<i_c; l++)
 	{
-		for(j=0; U->N_y; j++)
+		temp_density = 0;
+		contador = 0;
+		for(i=-l; i<l; i++)
 		{
-			for(k=0; U->N_z; k++)
+			for(j=-l; j<l; j++)
 			{
-				index = transform3d(i, j, k);
-				U = Ugrid.U[index];
-				Fx = Fgrid.F_x[index];
-				Fy = Fgrid.F_y[index];
-				Fz = Fgrid.F_z[index];
-
-				fromU_calcF(*U, *Fx, *Fy, *Fz);
+				for(k=-l; k<l; k++)
+				{
+					if(abs(i)+abs(j)+abs(k) >= l)
+					{
+						index = transform3d(i+i_c, j+j_c, k+k_c);
+						temp_density += P.P[index].rho;
+						contador += 1;
+					}
+				}
 			}
 		}
+		density[l] = temp_density/contador;
 	}
+	return density;
 }

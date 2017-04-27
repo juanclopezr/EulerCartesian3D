@@ -1,5 +1,6 @@
 #include "struct.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include "solver.h"
 
 void print_L(physics_grid *G){
@@ -11,7 +12,7 @@ void print_L(physics_grid *G){
 void print_E(int number, physics_grid *P)
 {
     char name[100];
-    sprintf(name, "%d_energy.dat", number);
+    sprintf(name, "%d_sedov.dat", number);
     FILE *energy = fopen(name, "w");
     int i, j, k, index;
     for(i = 0; i<P->N_x; i++)
@@ -26,4 +27,19 @@ void print_E(int number, physics_grid *P)
         }
     }
     fclose(energy);
+}
+
+void print_rho(int number, physics_grid *P)
+{
+    char name[100];
+    sprintf(name, "%d_sedov.dat", number);
+    FILE *file = fopen(name, "w");
+    FLOAT *density = calc_density(*P);
+    int i;
+    for(i=0; i<0.5*P->N_x; i++)
+    {
+        fprintf(file, "%f\n", density[i]);
+    }
+    free(density);
+    fclose(file);
 }

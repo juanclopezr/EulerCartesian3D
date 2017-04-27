@@ -3,13 +3,14 @@
 
 #define GAMMA 1.4
 
+#define SOD 0
 #define SEDOV 1
 #define NDIM 3
 
 // #define EXP_ENERGY 1e10 // J/kg
 // #define PRESSURE 101325.0 // Pa
-#define EXP_ENERGY 1e2 // J/kg
-#define PRESSURE 1 // Pa
+#define EXP_ENERGY 1e10 // J/kg
+#define PRESSURE 1e5 // Pa
 #define TEMPERATURE 300 // Kelvin
 #define RHO 1.0 // kg/m3
 #define VX 0.0 // m/s
