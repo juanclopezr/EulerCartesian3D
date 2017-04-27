@@ -147,182 +147,6 @@ void fromU_calcF(U_vector U, F_vector *Fx, F_vector *Fy, F_vector *Fz)
 	fromU_calcFz(U, Fz);
 }
 
-U_vector *calculateU_half(int ver, U_vector U1, U_vector U2)
-{
-	int i;
-	U_vector *U = create_U_vector();
-
-
-	if (ver==1)
-	{
-		for(i = 0; i<(NDIM+2); i++)
-		{
-			U->components[i] = 0.5*(U1.components[i] + U2.components[i]);
-		}
-	}
-	else{
-		for(i = 0; i<(NDIM+2); i++)
-		{
-			U->components[i] = U1.components[i];
-		}
-	}
-
-	return U;
-}
-
-U_vector *calculateU_half2(int ver, U_vector U1, U_vector U2, FLOAT coeff, int i_, int j_, int k_)
-{
-	int i;
-	U_vector *U_ = calculateU_half(ver, U1, U2);
-	F_vector *F1 = create_F_vector();
-	F_vector *F2 = create_F_vector();
-	if(i_ != 0)
-	{
-		fromU_calcFx(U1, F1);
-		if(ver == 1)
-		{
-			fromU_calcFx(U2, F2);
-		}
-	}
-	else if(j_ != 0)
-	{
-		fromU_calcFy(U1, F1);
-		if(ver == 1)
-		{
-			fromU_calcFy(U2, F2);
-		}
-	}
-	else if(k_ != 0)
-	{
-		fromU_calcFz(U1, F1);
-		if(ver == 1)
-		{
-			fromU_calcFz(U2, F2);
-		}
-	}
-	FLOAT temp;
-	for(i = 0; i<(NDIM+2); i++)
-	{
-		if(ver == 1)
-		{
-			temp = 0.5*coeff*(F2->components[i] - F1->components[i]);
-			if(temp > 0)
-			{
-				temp *= -1;
-			}
-			U_->components[i] += temp;
-		}
-	}
-	destruct_F_vector(F1);
-	destruct_F_vector(F2);
-	return U_;
-}
-
-
-
-F_vector *calculateF_half(U_grid *U, FLOAT coeff, int i, int j, int k, int i_, int j_, int k_)
-{
-	F_vector *F = create_F_vector();
-	U_vector U1;
-	U_vector U2;
-	U_vector *U_;
-
-	int ver = 0;
-	U1 = U->U[transform3d(i,j,k)];
-
-	if((i+i_>=0) && (i+i_< U->N_x))
-	{
-		if((j+j_>=0) && (j+j_< U->N_y))
-		{
-			if((k+k_>=0) && (k+k_< U->N_z))
-			{
-				ver = 1;
-				U2 = U->U[transform3d(i + i_, j + j_, k + k_)];
-			}
-		}
-	}
-	U_ = calculateU_half(ver, U1, U2);
-	// U_ = calculateU_half2(ver, U1, U2, coeff, i_, j_, k_);
-	if(i_ != 0)
-	{
-		fromU_calcFx(*U_, F);
-	}
-	else if(j_ != 0)
-	{
-		fromU_calcFy(*U_, F);
-	}
-	else if(k_ != 0)
-	{
-		fromU_calcFz(*U_, F);
-	}
-
-	destruct_U_vector(U_);
-	return F;
-}
-
-// F_vector *calculateF_half(U_grid *U, int i, int j, int k, int i_, int j_, int k_)
-// {
-// 	F_vector *F = create_F_vector();
-// 	F_vector *Fp = create_F_vector();
-// 	U_vector U1;
-// 	int m;
-// 	FLOAT temp;
-//
-// 	U1 = U->U[transform3d(i, j, k)];
-//
-// 	if(i_ != 0)
-// 	{
-// 		fromU_calcFx(U1, F);
-// 	}
-// 	else if(j_ != 0)
-// 	{
-// 		fromU_calcFy(U1, F);
-// 	}
-// 	else if(k_ != 0)
-// 	{
-// 		fromU_calcFz(U1, F);
-// 	}
-//
-// 	if((i+i_>=0) && (i+i_< U->N_x))
-// 	{
-// 		if((j+j_>=0) && (j+j_< U->N_y))
-// 		{
-// 			if((k+k_>=0) && (k+k_< U->N_z))
-// 			{
-// 				U1 = U->U[transform3d(i + i_, j + j_, k + k_)];
-// 			}
-// 		}
-// 	}
-//
-// 	if(i_ != 0)
-// 	{
-// 		fromU_calcFx(U1, Fp);
-// 	}
-// 	else if(j_ != 0)
-// 	{
-// 		fromU_calcFy(U1, Fp);
-// 	}
-// 	else if(k_ != 0)
-// 	{
-// 		fromU_calcFz(U1, Fp);
-// 	}
-//
-// 	temp = 0.5*(F->components[0]+Fp->components[0]);
-// 	F->components[0] = temp;
-// 	temp = 0.5*(F->components[1]+Fp->components[1]);
-// 	F->components[1] = temp;
-// 	temp = 0.5*(F->components[2]+Fp->components[2]);
-// 	F->components[2] = temp;
-// 	temp = 0.5*(F->components[3]+Fp->components[3]);
-// 	F->components[3] = temp;
-// 	temp = 0.5*(F->components[4]+Fp->components[4]);
-// 	F->components[4] = temp;
-//
-// 	destruct_F_vector(Fp);
-//
-// 	return F;
-// }
-
 F_vector *calculateF_diff(F_vector F_plus, F_vector F_minus)
 {
 	int i;
@@ -331,6 +155,3845 @@ F_vector *calculateF_diff(F_vector F_plus, F_vector F_minus)
 	{
 		F->components[i] = F_plus.components[i] - F_minus.components[i];
 	}
+	return F;
+}
+
+U_vector *calculateU_half(U_gird *U, int i, int j, int k, int edgex, int edgey, int edgez, int comp, int term, int dir, FLOAT dt)
+{
+	U_vector *Ucal = create_U_vector();
+	U_vector U1;
+	F_vector *Fcal = create_F_vector();
+	
+	U1 = U->U[transform3d(i,j,k)];
+	addU(Ucal,U1);
+	
+	if(comp==1)
+	{
+		if(term==1)
+		{
+			if(edgex*dir<=0)
+			{
+				if(edgey==0)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k+1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j+1,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,dir,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,1,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j+1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k+1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j+1,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,dir,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,1,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+				else if(edgey==1)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+				}
+				else
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k+1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j+1,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,dir,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,1,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j+1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k+1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j+1,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,dir,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,1,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+			}
+			else
+			{
+				if(edgey==0)
+				{
+					if(edgez==0)
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+				}
+				else if(edgey==1)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+					}
+					else if(edgez==1)
+					{
+					}
+					else
+					{
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+					}
+				}
+				else
+				{
+					if(edgez==0)
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+				}
+			}
+		}
+		else if(term==2)
+		{
+			if(edgex*dir<=0)
+			{
+				if(edgey==0)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k+1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j-1,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,dir,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,1,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j-1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k+1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j-1,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,dir,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,1,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+				else if(edgey==1)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k+1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j-1,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,dir,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,1,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j-1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k+1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j-1,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,dir,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,1,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+				else
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+				}
+			}
+			else
+			{
+				if(edgey==0)
+				{
+					if(edgez==0)
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+				}
+				else if(edgey==1)
+				{
+					if(edgez==0)
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+				}
+				else
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+					}
+					else if(edgez==1)
+					{
+					}
+					else
+					{
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+					}
+				}
+			}
+		}
+		else if(term==3)
+		{
+			if(edgex*dir<=0)
+			{
+				if(edgey==0)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k-1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j+1,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,dir,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,1,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j+1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,dir,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j+1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+				else if(edgey==1)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+					}
+				}
+				else
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k-1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j+1,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,dir,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,1,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j+1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,dir,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j+1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+			}
+			else
+			{
+				if(edgey==0)
+				{
+					if(edgez==0)
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+					}
+				}
+				else if(edgey==1)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+					}
+				}
+				else
+				{
+					if(edgez==0)
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+					}
+				}
+			}
+		}
+		else
+		{
+			if(edgex*dir<=0)
+			{
+				if(edgey==0)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k-1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j-1,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,dir,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,1,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j-1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,dir,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+dir,j-1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+				else if(edgey==1)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+					}
+				}
+				else
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+dir,j,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+dir,j,k)];
+						addU(Ucal,U1);
+					}
+				}
+			}
+			else
+			{
+				if(edgey==0)
+				{
+					if(edgez==0)
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+					}
+				}
+				else if(edgey==1)
+				{
+					if(edgez==0)
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+					}
+				}
+				else
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+					}
+				}
+			}
+		}
+	}
+	else if(comp==2)
+	{
+		if(term==1)
+		{
+			if(edgey*dir<=0)
+			{
+				if(edgex==0)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+				else if(edgex==1)
+				{
+					if(edgez==0)
+					{
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+				}
+				else
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+			}
+			else
+			{
+				if(edgex==0)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+				}
+				else if(edgex==1)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+					}
+					else if(edgez==1)
+					{
+					}
+					else
+					{
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+					}
+				}
+				else
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+				}
+			}
+		}
+		else if(term==2)
+		{
+			if(edgey*dir<=0)
+			{
+				if(edgex==0)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+				else if(edgex==1)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+				else
+				{
+					if(edgez==0)
+					{
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+				}
+			}
+			else
+			{
+				if(edgex==0)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+				}
+				else if(edgex==1)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+				}
+				else
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+					}
+					else if(edgez==1)
+					{
+					}
+					else
+					{
+						U1 = U->U[transform3d(i,j,k+1)];
+						addU(Ucal,U1);
+					}
+				}
+			}
+		}
+		else if(term==3)
+		{
+			if(edgey*dir<=0)
+			{
+				if(edgex==0)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k-1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{	
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k-1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+				else if(edgex==1)
+				{
+					if(edgez==0)
+					{
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+					}
+				}
+				else
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k-1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k-1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+			}
+			else
+			{
+				if(edgex==0)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+					}
+				}
+				else if(edgex==1)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						
+					}
+					else
+					{
+					}
+				}
+				else
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+					}
+				}
+			}
+		}
+		else
+		{
+			if(edgey*dir<=0)
+			{
+				if(edgex==0)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k-1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k-1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+				else if(edgex==1)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k-1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k-1)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+				else
+				{
+					if(edgez==0)
+					{
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+dir,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = u->u[transform3d(i,j+dir,k)];
+						addU(Ucal,U1);
+					}
+				}
+			}
+			else
+			{
+				if(edgex==0)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+					}
+				}
+				else if(edgex==1)
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k-1)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+					}
+				}
+				else
+				{
+					if(edgez==0)
+					{
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+					}
+					else if(edgez==1)
+					{
+						U1 = U->U[transform3d(i,j,k-1)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		if(term==1)
+		{
+			if(edgez*dir<=0)
+			{
+				if(edgex==0)
+				{
+					if(edgey==0)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgey==1)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+				else if(edgex==1)
+				{
+					if(edgey==0)
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else if(edgey==1)
+					{
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+				}
+				else
+				{
+					if(edgey==0)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgey==1)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+			}
+			else
+			{
+				if(edgex==0)
+				{
+					if(edgey==0)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgey==1)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+				else if(edgex==1)
+				{
+					if(edgey==0)
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+					}
+					else if(edgey==1)
+					{
+					}
+					else
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+					}
+				}
+				else
+				{
+					if(edgey==0)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgey==1)
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j+1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+			}
+		}
+		else if(term==2)
+		{
+			if(edgez*dir<=0)
+			{
+				if(edgex==0)
+				{
+					if(edgey==0)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgey==1)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+				else if(edgex==1)
+				{
+					if(edgey==0)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgey==1)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+				else
+				{
+					if(edgey==0)
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else if(edgey==1)
+					{
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j+1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+				}
+			}
+			else
+			{
+				if(edgex==0)
+				{
+					if(edgey==0)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgey==1)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+				else if(edgex==1)
+				{
+					if(edgey==0)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgey==1)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j+1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+				}
+				else
+				{
+					if(edgey==0)
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+					}
+					else if(edgey==1)
+					{
+					}
+					else
+					{
+						U1 = u->u[transform3d(i,j+1,k)];
+						addU(Ucal,U1);
+					}
+				}
+			}
+		}
+		else if(term==3)
+		{
+			if(edgez*dir<=0)
+			{
+				if(edgex==0)
+				{
+					if(edgey==0)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgey==1)
+					{	
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+				}
+				else if(edgex==1)
+				{
+					if(edgey==0)
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						
+					}
+					else if(edgey==1)
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+					}
+				}
+				else
+				{
+					if(edgey==0)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgey==1)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i+1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+				}
+			}
+			else
+			{
+				if(edgex==0)
+				{
+					if(edgey==0)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j-1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgey==1)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j-1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+					}
+				}
+				else if(edgex==1)
+				{
+					if(edgey==0)
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+					}
+					else if(edgey==1)
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+					}
+				}
+				else
+				{
+					if(edgey==0)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j-1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgey==1)
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i+1,j-1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i+1,j,k)];
+						addU(Ucal,U1);
+					}
+				}
+			}
+		}
+		else
+		{
+			if(edgez*dir<=0)
+			{
+				if(edgex==0)
+				{
+					if(edgey==0)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgey==1)
+					{	
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+				}
+				else if(edgex==1)
+				{
+					if(edgey==0)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+						
+					}
+					else if(edgey==1)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,1,1,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,1,dir,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,1,1,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						addUF(U1,Fcal);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i-1,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,2,2,0,term,dt);
+						fromU_calcFy(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_y);
+						subsUF(U1,Fcal);
+					}
+				}
+				else
+				{
+					if(edgey==0)
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else if(edgey==1)
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+						U1 = U->U[transform3d(i,j-1,k+dir)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,1,2,0,term,dt);
+						fromU_calcFx(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_x);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i,j,k+dir)];
+						addU(Ucal,U1);
+					}
+				}
+			}
+			else
+			{
+				if(edgex==0)
+				{
+					if(edgey==0)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j-1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgey==1)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j-1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+					}
+				}
+				else if(edgex==1)
+				{
+					if(edgey==0)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j-1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else if(edgey==1)
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+						U1 = u->u[transform3d(i-1,j-1,k)];
+						addU(Ucal,U1);
+						U1 = calculateUfourth(U,i,j,k,3,2,0,term,dt);
+						fromU_calcFz(U1,Fcal);
+						factor(Fcal,0.5*dt/U->delta_z);
+						subsUF(U1,Fcal);
+					}
+					else
+					{
+						U1 = U->U[transform3d(i-1,j,k)];
+						addU(Ucal,U1);
+					}
+				}
+				else
+				{
+					if(edgey==0)
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+					}
+					else if(edgey==1)
+					{
+						U1 = u->u[transform3d(i,j-1,k)];
+						addU(Ucal,U1);
+					}
+					else
+					{
+					}
+				}
+			}
+		}
+	}
+	destruct_F_vector(Fcal);
+	return Ucal;
+}
+	
+
+F_vector *calculateF_half(U_grid *U, int i, int j, int k, int i_, int j_, int k_, FLOAT dt)
+{
+	F_vector *F = create_F_vector();
+	U_vector *U_;
+	F_vector *Fcal = create_F_vector();
+	
+	int edgex = 0;
+	int edgey = 0;
+	int edgez = 0;
+	
+	if(i==0)
+	{
+		edgex = 1;
+	}
+	else if(i==U->N_x-1)
+	{
+		edgex = -1;
+	}
+	
+	if(j==0)
+	{
+		edgey = 1;
+	}
+	else if(j==U->N_y-1)
+	{
+		edgey = -1;
+	}
+	
+	if(k==0)
+	{
+		edgez = 1;
+	}
+	else if(k==U->N_z-1)
+	{
+		edgez = -1;
+	}
+	
+	if(i_!=0)
+	{
+		U_ = calculateU_half(U,i,j,k,edgex,edgey,edgez,1,1,i_,dt);
+		FromU_calcFx(*U_, Fcal);
+		addF(F,Fcal);
+		U_ = calculateU_half(U,i,j,k,edgex,edgey,edgez,1,2,i_,dt);
+		FromU_calcFx(*U_, Fcal);
+		addF(F,Fcal);
+		U_ = calculateU_half(U,i,j,k,edgex,edgey,edgez,1,3,i_,dt);
+		FromU_calcFx(*U_, Fcal);
+		addF(F,Fcal);
+		U_ = calculateU_half(U,i,j,k,edgex,edgey,edgez,1,4,i_,dt);
+		FromU_calcFx(*U_, Fcal);
+		addF(F,Fcal);
+		factor(F,0.25);
+	}
+	if(j_!=0)
+	{
+		U_ = calculateU_half(U,i,j,k,edgex,edgey,edgez,2,1,j_,dt);
+		FromU_calcFy(*U_,Fcal);
+		addF(F,Fcal);
+		U_ = calculateU_half(U,i,j,k,edgex,edgey,edgez,2,2,j_,dt);
+		FromU_calcFy(*U_,Fcal);
+		addF(F,Fcal);
+		U_ = calculateU_half(U,i,j,k,edgex,edgey,edgez,2,3,j_,dt);
+		FromU_calcFy(*U_,Fcal);
+		addF(F,Fcal);
+		U_ = calculateU_half(U,i,j,k,edgex,edgey,edgez,2,4,j_,dt);
+		FromU_calcFy(*U_,Fcal);
+		addF(F,Fcal);
+		factor(F,0.25);
+	}
+	if(k_!=0)
+	{
+		U_ = calculateU_half(U,i,j,k,edgex,edgey,edgez,3,1,k_,dt);
+		FromU_calcFz(*U_,Fcal);
+		addF(F,Fcal);
+		U_ = calculateU_half(U,i,j,k,edgex,edgey,edgez,3,2,k_,dt);
+		FromU_calcFz(*U_,Fcal);
+		addF(F,Fcal);
+		U_ = calculateU_half(U,i,j,k,edgex,edgey,edgez,3,3,k_,dt);
+		FromU_calcFz(*U_,Fcal);
+		addF(F,Fcal);
+		U_ = calculateU_half(U,i,j,k,edgex,edgey,edgez,3,4,k_,dt);
+		FromU_calcFz(*U_,Fcal);
+		addF(F,Fcal);
+		factor(F,0.25);
+	}
+	destruct_F_vector(Fcal);
 	return F;
 }
 
@@ -439,34 +4102,26 @@ void updatePhysics(physics_grid *P, U_grid U)
 	}
 }
 
-FLOAT *calc_density(physics_grid P)
+void fromUgrid_calcFgrid(U_grid Ugrid, F_grid Fgrid)
 {
-	FLOAT *density = malloc(0.5*P.N_x*sizeof(FLOAT));
-	int i, j, k, l, i_c, j_c, k_c, index, contador;
-	FLOAT temp_density;
-	i_c = 0.5*P.N_x;
-	j_c = 0.5*P.N_x;
-	k_c = 0.5*P.N_x;
-	for(l=0; l<i_c; l++)
+	U_vector U;
+	F_vector Fx, Fy, Fz;
+
+	int i, j, k, index;
+	for(i=0; U->N_x; i++)
 	{
-		temp_density = 0;
-		contador = 0;
-		for(i=-l; i<l; i++)
+		for(j=0; U->N_y; j++)
 		{
-			for(j=-l; j<l; j++)
+			for(k=0; U->N_z; k++)
 			{
-				for(k=-l; k<l; k++)
-				{
-					if(abs(i)+abs(j)+abs(k) >= l)
-					{
-						index = transform3d(i+i_c, j+j_c, k+k_c);
-						temp_density += P.P[index].rho;
-						contador += 1;
-					}
-				}
+				index = transform3d(i, j, k);
+				U = Ugrid.U[index];
+				Fx = Fgrid.F_x[index];
+				Fy = Fgrid.F_y[index];
+				Fz = Fgrid.F_z[index];
+
+				fromU_calcF(*U, *Fx, *Fy, *Fz);
 			}
 		}
-		density[l] = temp_density/contador;
 	}
-	return density;
 }
