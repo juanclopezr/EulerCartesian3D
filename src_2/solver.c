@@ -158,7 +158,353 @@ F_vector *calculateF_diff(F_vector F_plus, F_vector F_minus)
 	return F;
 }
 
-U_vector *calculateU_half(U_gird *U, int i, int j, int k, int edgex, int edgey, int edgez, int comp, int term, int dir, FLOAT dt)
+U_vector *calcualteU_fourth(U_grid *U, int i, int j, int k, int comp, int compp, int disp, int term, FLOAT dt)
+{
+	U_vector *Ucal = create_U_vector();
+	U_vector U1;
+	F_vector *Fcal = create_F_vector();
+	
+	if(comp==1)
+	{
+		if(term==1)
+		{
+			U1 = U->U[transform3d(i+disp,j,k)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+disp,j+1,k)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+disp,j,k+1)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+disp,j+1,k+1)];
+			addU(Ucal,U1);
+			U1 = calculateU_sixth(U,i+disp,j+1,k,1,comp,compp,term,dt);
+			FromU_calcFy(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_y);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i+disp,j,k,1,comp,compp,term,dt);
+			FromU_calcFy(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_y);
+			subsUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i+disp,j,k+1,2,comp,compp,term,dt);
+			FromU_calcFz(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_z);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i+disp,j,k,2,comp,compp,term,dt);
+			FromU_calcFz(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_z);
+			subsUF(U1,Fcal);
+		}
+		else if(term==2)
+		{
+			U1 = U->U[transform3d(i+disp,j,k)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+disp,j-1,k)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+disp,j,k+1)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+disp,j-1,k+1)];
+			addU(Ucal,U1);
+			U1 = calculateU_sixth(U,i+disp,j-1,k,1,comp,compp,term,dt);
+			FromU_calcFy(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_y);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i+disp,j,k,1,comp,compp,term,dt);
+			FromU_calcFy(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_y);
+			subsUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i+disp,j,k+1,2,comp,compp,term,dt);
+			FromU_calcFz(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_z);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i+disp,j,k,2,comp,compp,term,dt);
+			FromU_calcFz(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_z);
+			subsUF(U1,Fcal);
+		}
+		else if(term==3)
+		{
+			U1 = U->U[transform3d(i+disp,j,k)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+disp,j+1,k)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+disp,j,k-1)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+disp,j+1,k-1)];
+			addU(Ucal,U1);
+			U1 = calculateU_sixth(U,i+disp,j+1,k,1,comp,compp,term,dt);
+			FromU_calcFy(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_y);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i+disp,j,k,1,comp,compp,term,dt);
+			FromU_calcFy(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_y);
+			subsUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i+disp,j,k-1,2,comp,compp,term,dt);
+			FromU_calcFz(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_z);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i+disp,j,k,2,comp,compp,term,dt);
+			FromU_calcFz(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_z);
+			subsUF(U1,Fcal);
+		}
+		else
+		{
+			U1 = U->U[transform3d(i+disp,j,k)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+disp,j-1,k)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+disp,j,k-1)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+disp,j-1,k-1)];
+			addU(Ucal,U1);
+			U1 = calculateU_sixth(U,i+disp,j-1,k,1,comp,compp,term,dt);
+			FromU_calcFy(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_y);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i+disp,j,k,1,comp,compp,term,dt);
+			FromU_calcFy(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_y);
+			subsUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i+disp,j,k-1,2,comp,compp,term,dt);
+			FromU_calcFz(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_z);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i+disp,j,k,2,comp,compp,term,dt);
+			FromU_calcFz(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_z);
+			subsUF(U1,Fcal);
+		}
+	}
+	else if(comp==2)
+	{
+		if(term==1)
+		{
+			U1 = U->U[transform3d(i,j+disp,k)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+1,j+disp,k)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i,j+disp,k+1)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+1,j+disp,k+1)];
+			addU(Ucal,U1);
+			U1 = calculateU_sixth(U,i+1,j+disp,k,1,comp,compp,term,dt);
+			FromU_calcFx(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_x);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i,j+disp,k,1,comp,compp,term,dt);
+			FromU_calcFx(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_x);
+			subsUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i+1,j+disp,k+1,2,comp,compp,term,dt);
+			FromU_calcFz(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_z);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i+1,j+disp,k,2,comp,compp,term,dt);
+			FromU_calcFz(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_z);
+			subsUF(U1,Fcal);
+		}
+		else if(term==2)
+		{
+			U1 = U->U[transform3d(i,j+disp,k)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i-1,j+disp,k)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i,j+disp,k+1)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i-1,j+disp,k+1)];
+			addU(Ucal,U1);
+			U1 = calculateU_sixth(U,i-1,j+disp,k,1,comp,compp,term,dt);
+			FromU_calcFx(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_x);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i,j+disp,k,1,comp,compp,term,dt);
+			FromU_calcFx(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_x);
+			subsUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i-1,j+disp,k+1,2,comp,compp,term,dt);
+			FromU_calcFz(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_z);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i-1,j+disp,k,2,comp,compp,term,dt);
+			FromU_calcFz(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_z);
+			subsUF(U1,Fcal);
+		}
+		else if(term==3)
+		{
+			U1 = U->U[transform3d(i,j+disp,k)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+1,j+disp,k)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i,j+disp,k-1)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+1,j+disp,k-1)];
+			addU(Ucal,U1);
+			U1 = calculateU_sixth(U,i+1,j+disp,k,1,comp,compp,term,dt);
+			FromU_calcFx(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_x);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i,j+disp,k,1,comp,compp,term,dt);
+			FromU_calcFx(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_x);
+			subsUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i+1,j+disp,k-1,2,comp,compp,term,dt);
+			FromU_calcFz(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_z);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i+1,j+disp,k,2,comp,compp,term,dt);
+			FromU_calcFz(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_z);
+			subsUF(U1,Fcal);
+		}
+		else
+		{
+			U1 = U->U[transform3d(i,j+disp,k)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i-1,j+disp,k)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i,j+disp,k-1)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i-1,j+disp,k-1)];
+			addU(Ucal,U1);
+			U1 = calculateU_sixth(U,i-1,j+disp,k,1,comp,compp,term,dt);
+			FromU_calcFx(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_x);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i,j+disp,k,1,comp,compp,term,dt);
+			FromU_calcFx(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_x);
+			subsUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i-1,j+disp,k-1,2,comp,compp,term,dt);
+			FromU_calcFz(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_z);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i-1,j+disp,k,2,comp,compp,term,dt);
+			FromU_calcFz(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_z);
+			subsUF(U1,Fcal);
+		}
+	}
+	//fix
+	else
+	{
+		if(term==1)
+		{
+			U1 = U->U[transform3d(i,j,k+disp)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+1,j,k+disp)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i,j+1,k+disp)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+1,j+1,k+disp+1)];
+			addU(Ucal,U1);
+			U1 = calculateU_sixth(U,i,j,k+disp,1,comp,compp,term,dt);
+			FromU_calcFx(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_x);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i+1,j,k+disp,1,comp,compp,term,dt);
+			FromU_calcFx(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_x);
+			subsUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i,j,k+disp,2,comp,compp,term,dt);
+			FromU_calcFy(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_y);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i,j+1,k+disp,2,comp,compp,term,dt);
+			FromU_calcFy(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_y);
+			subsUF(U1,Fcal);
+		}
+		else if(term==2)
+		{
+			U1 = U->U[transform3d(i,j,k+disp)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i-1,j,k+disp)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i,j+1,k+disp)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i-1,j+1,k+disp+1)];
+			addU(Ucal,U1);
+			U1 = calculateU_sixth(U,i,j,k+disp,1,comp,compp,term,dt);
+			FromU_calcFx(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_x);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i-1,j,k+disp,1,comp,compp,term,dt);
+			FromU_calcFx(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_x);
+			subsUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i,j,k+disp,2,comp,compp,term,dt);
+			FromU_calcFy(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_y);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i,j+1,k+disp,2,comp,compp,term,dt);
+			FromU_calcFy(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_y);
+			subsUF(U1,Fcal);
+		}
+		else if(term==3)
+		{
+			U1 = U->U[transform3d(i,j,k+disp)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+1,j,k+disp)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i,j-1,k+disp)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i+1,j-1,k+disp+1)];
+			addU(Ucal,U1);
+			U1 = calculateU_sixth(U,i,j,k+disp,1,comp,compp,term,dt);
+			FromU_calcFx(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_x);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i+1,j,k+disp,1,comp,compp,term,dt);
+			FromU_calcFx(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_x);
+			subsUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i,j,k+disp,2,comp,compp,term,dt);
+			FromU_calcFy(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_y);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i,j-1,k+disp,2,comp,compp,term,dt);
+			FromU_calcFy(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_y);
+			subsUF(U1,Fcal);
+		}
+		else
+		{
+			U1 = U->U[transform3d(i,j,k+disp)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i-1,j,k+disp)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i,j-1,k+disp)];
+			addU(Ucal,U1);
+			U1 = U->U[transform3d(i-1,j-1,k+disp+1)];
+			addU(Ucal,U1);
+			U1 = calculateU_sixth(U,i,j,k+disp,1,comp,compp,term,dt);
+			FromU_calcFx(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_x);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i-1,j,k+disp,1,comp,compp,term,dt);
+			FromU_calcFx(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_x);
+			subsUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i,j,k+disp,2,comp,compp,term,dt);
+			FromU_calcFy(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_y);
+			addUF(U1,Fcal);
+			U1 = calculateU_sixth(U,i,j-1,k+disp,2,comp,compp,term,dt);
+			FromU_calcFy(U1,Fcal);
+			factor(Fcal,0.25*dt/U->delta_y);
+			subsUF(U1,Fcal);
+		}
+	}
+	destruct_F_vector(Fcal);
+	factorU(Ucal,0.25);
+	return Ucal;
+}
+	
+
+U_vector *calculateU_half(U_grid *U, int i, int j, int k, int edgex, int edgey, int edgez, int comp, int term, int dir, FLOAT dt)
 {
 	U_vector *Ucal = create_U_vector();
 	U_vector U1;
@@ -3904,6 +4250,7 @@ U_vector *calculateU_half(U_gird *U, int i, int j, int k, int edgex, int edgey, 
 		}
 	}
 	destruct_F_vector(Fcal);
+	FactorU(Ucal,1./8.);
 	return Ucal;
 }
 	
