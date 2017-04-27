@@ -158,6 +158,51 @@ F_vector *calculateF_diff(F_vector F_plus, F_vector F_minus)
 	return F;
 }
 
+void factorU(U_vector U, FLOAT fact)
+{
+	U.components[0] = U.components[0]/Uact;
+	U.components[1] = U.components[1]/Uact;
+	U.components[2] = U.components[2]/Uact;
+	U.components[3] = U.components[3]/Uact;
+	U.components[4] = U.components[4]/Uact;
+}
+
+void factor(F_vector F, FLOAT fact)
+{
+	F.components[0] = F.components[0]/fact;
+	F.components[1] = F.components[1]/fact;
+	F.components[2] = F.components[2]/fact;
+	F.components[3] = F.components[3]/fact;
+	F.components[4] = F.components[4]/fact;
+}
+
+void subsUF(U_vector U, F_vector F)
+{
+	U.components[0] -= F.components[0];
+	U.components[1] -= F.components[1];
+	U.components[2] -= F.components[2];
+	U.components[3] -= F.components[3];
+	U.components[4] -= F.components[4];
+}
+
+void addUF(U_vector U, F_vector F)
+{
+	U.components[0] += F.components[0];
+	U.components[1] += F.components[1];
+	U.components[2] += F.components[2];
+	U.components[3] += F.components[3];
+	U.components[4] += F.components[4];
+}
+
+void addU(U_vector U1, U_vector U2)
+{
+	U1.components[0] += U2.components[0];
+	U1.components[1] += U2.components[1];
+	U1.components[2] += U2.components[2];
+	U1.components[3] += U2.components[3];
+	U1.components[4] += U2.components[4];
+}
+
 U_vector *calculateU_sixth(U_grid *U, int i, int j, int k, int compo,comp,compp,term,dt)
 {
 	U_vector *Ucal = create_u_vector();
