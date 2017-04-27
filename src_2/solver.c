@@ -4478,12 +4478,12 @@ FLOAT calculateNextU(physics_grid *P, U_grid *U, U_grid U_temp, double dt)
 			for(k=0; k<U->N_z; k++)
 			{
 				index = transform3d(i, j, k);
-				Fxr = calculateF_half(U, dtdx, i, j, k, 1, 0, 0);
-				Fxl = calculateF_half(U, dtdx, i, j, k, -1, 0, 0);
-				Fyr = calculateF_half(U, dtdy, i, j, k, 0, 1, 0);
-				Fyl = calculateF_half(U, dtdy, i, j, k, 0, -1, 0);
-				Fzr = calculateF_half(U, dtdz, i, j, k, 0, 0, 1);
-				Fzl = calculateF_half(U, dtdz, i, j, k, 0, 0, -1);
+				Fxr = calculateF_half(U, dtdx, i, j, k, 1, 0, 0, dt);
+				Fxl = calculateF_half(U, dtdx, i, j, k, -1, 0, 0, dt);
+				Fyr = calculateF_half(U, dtdy, i, j, k, 0, 1, 0), dt;
+				Fyl = calculateF_half(U, dtdy, i, j, k, 0, -1, 0, dt);
+				Fzr = calculateF_half(U, dtdz, i, j, k, 0, 0, 1, dt);
+				Fzl = calculateF_half(U, dtdz, i, j, k, 0, 0, -1, dt);
 
 				Fx = calculateF_diff(*Fxr, *Fxl);
 				Fy = calculateF_diff(*Fyr, *Fyl);
