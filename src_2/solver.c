@@ -160,7 +160,51 @@ F_vector *calculateF_diff(F_vector F_plus, F_vector F_minus)
 
 U_vector *calculateU_sixth(U_grid *U, int i, int j, int k, int compo,comp,compp,term,dt)
 {
-	f;
+	U_vector *Ucal = create_u_vector();
+	U_vector U1;
+	F_vector *Fcal = create_F_vector();
+	if(compo==1)
+	{
+		U1 = U->U[transform3d(i,j,k)];
+		addU(Ucal,U1);
+		FromU_calcFx(U1,Fcal);
+		factor(Fcal,dt/(3.*U->delta_x));
+		addUF(Ucal,Fcal);
+		U1 = U->U[transform3d(i+1,j,k)];
+		addU(Ucal,U1);
+		FromU_calcFx(U1,Fcal);
+		factor(Fcal,dt/(3.*U->delta_x));
+		subsUF(Ucal,Fcal);
+	}
+	else if(compo==2)
+	{
+		U1 = U->U[transform3d(i,j,k)];
+		addU(Ucal,U1);
+		FromU_calcFy(U1,Fcal);
+		factor(Fcal,dt/(3.*U->delta_y));
+		addUF(Ucal,Fcal);
+		U1 = U->U[transform3d(i,j+1,k)];
+		addU(Ucal,U1);
+		FromU_calcFy(U1,Fcal);
+		factor(Fcal,dt/(3.*U->delta_y));
+		subsUF(Ucal,Fcal);
+	}
+	else
+	{
+		U1 = U->U[transform3d(i,j,k)];
+		addU(Ucal,U1);
+		FromU_calcFz(U1,Fcal);
+		factor(Fcal,dt/(3.*U->delta_z));
+		addUF(Ucal,Fcal);
+		U1 = U->U[transform3d(i,j,k+1)];
+		addU(Ucal,U1);
+		FromU_calcFz(U1,Fcal);
+		factor(Fcal,dt/(3.*U->delta_z));
+		subsUF(Ucal,Fcal);
+	}
+	destruct_F_vector(Fcal)
+	factorU(Ucal,0.5);
+	return Ucal;
 }
 
 U_vector *calculateU_fourth(U_grid *U, int i, int j, int k, int comp, int compp, int disp, int term, FLOAT dt)
