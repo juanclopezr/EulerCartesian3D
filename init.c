@@ -194,7 +194,6 @@ void destruct_grids(physics_grid *P, U_grid *U1, U_grid *U2, F_grid *F)
             free(F->F_y[i].components);
             free(F->F_z[i].components);
         }
-
     }
     free(U1->U);
     free(U2->U);

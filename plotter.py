@@ -1,6 +1,8 @@
 import sys
 import numpy as np
 from glob import glob
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 def calculateU4(Gamma, beta, p3):
@@ -41,10 +43,11 @@ def find_p3(Gamma, beta, thresh=1e-4):
 	return p3
 
 def analytic_sod():
-	n = 100
+	n = 1000
 	x = np.linspace(0, 1.0, n)
 	Gamma = (gamma-1)/(gamma+1)
 	beta = 0.5*(gamma-1)/gamma
+	x_final = 0.9
 	c1 = np.sqrt(gamma*p1/rho1)
 
 	p3 = find_p3(Gamma, beta)
@@ -74,6 +77,7 @@ def analytic_sod():
 			density[i] = rho1*(c/c1)**(2/(gamma-1))
 			pressure[i] = p1*(density[i]/rho1)**gamma
 			speed[i] = (1-Gamma)*(c1-(x0-x[i])/t)
+			x4 = x_final
 
 		elif x[i] < x3:
 			pressure[i] = p3

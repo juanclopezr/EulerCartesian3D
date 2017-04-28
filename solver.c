@@ -170,57 +170,7 @@ U_vector *calculateU_half(int ver, U_vector U1, U_vector U2)
 	return U;
 }
 
-U_vector *calculateU_half2(int ver, U_vector U1, U_vector U2, FLOAT coeff, int i_, int j_, int k_)
-{
-	int i;
-	U_vector *U_ = calculateU_half(ver, U1, U2);
-	F_vector *F1 = create_F_vector();
-	F_vector *F2 = create_F_vector();
-	if(i_ != 0)
-	{
-		fromU_calcFx(U1, F1);
-		if(ver == 1)
-		{
-			fromU_calcFx(U2, F2);
-		}
-	}
-	else if(j_ != 0)
-	{
-		fromU_calcFy(U1, F1);
-		if(ver == 1)
-		{
-			fromU_calcFy(U2, F2);
-		}
-	}
-	else if(k_ != 0)
-	{
-		fromU_calcFz(U1, F1);
-		if(ver == 1)
-		{
-			fromU_calcFz(U2, F2);
-		}
-	}
-	FLOAT temp;
-	for(i = 0; i<(NDIM+2); i++)
-	{
-		if(ver == 1)
-		{
-			temp = 0.5*coeff*(F2->components[i] - F1->components[i]);
-			if(temp > 0)
-			{
-				temp *= -1;
-			}
-			U_->components[i] += temp;
-		}
-	}
-	destruct_F_vector(F1);
-	destruct_F_vector(F2);
-	return U_;
-}
-
-
-
-F_vector *calculateF_half(U_grid *U, FLOAT coeff, int i, int j, int k, int i_, int j_, int k_)
+F_vector *calculateF_half(U_grid *U, int i, int j, int k, int i_, int j_, int k_)
 {
 	F_vector *F = create_F_vector();
 	U_vector U1;
@@ -242,7 +192,6 @@ F_vector *calculateF_half(U_grid *U, FLOAT coeff, int i, int j, int k, int i_, i
 		}
 	}
 	U_ = calculateU_half(ver, U1, U2);
-	// U_ = calculateU_half2(ver, U1, U2, coeff, i_, j_, k_);
 	if(i_ != 0)
 	{
 		fromU_calcFx(*U_, F);
@@ -259,69 +208,6 @@ F_vector *calculateF_half(U_grid *U, FLOAT coeff, int i, int j, int k, int i_, i
 	destruct_U_vector(U_);
 	return F;
 }
-
-// F_vector *calculateF_half(U_grid *U, int i, int j, int k, int i_, int j_, int k_)
-// {
-// 	F_vector *F = create_F_vector();
-// 	F_vector *Fp = create_F_vector();
-// 	U_vector U1;
-// 	int m;
-// 	FLOAT temp;
-//
-// 	U1 = U->U[transform3d(i, j, k)];
-//
-// 	if(i_ != 0)
-// 	{
-// 		fromU_calcFx(U1, F);
-// 	}
-// 	else if(j_ != 0)
-// 	{
-// 		fromU_calcFy(U1, F);
-// 	}
-// 	else if(k_ != 0)
-// 	{
-// 		fromU_calcFz(U1, F);
-// 	}
-//
-// 	if((i+i_>=0) && (i+i_< U->N_x))
-// 	{
-// 		if((j+j_>=0) && (j+j_< U->N_y))
-// 		{
-// 			if((k+k_>=0) && (k+k_< U->N_z))
-// 			{
-// 				U1 = U->U[transform3d(i + i_, j + j_, k + k_)];
-// 			}
-// 		}
-// 	}
-//
-// 	if(i_ != 0)
-// 	{
-// 		fromU_calcFx(U1, Fp);
-// 	}
-// 	else if(j_ != 0)
-// 	{
-// 		fromU_calcFy(U1, Fp);
-// 	}
-// 	else if(k_ != 0)
-// 	{
-// 		fromU_calcFz(U1, Fp);
-// 	}
-//
-// 	temp = 0.5*(F->components[0]+Fp->components[0]);
-// 	F->components[0] = temp;
-// 	temp = 0.5*(F->components[1]+Fp->components[1]);
-// 	F->components[1] = temp;
-// 	temp = 0.5*(F->components[2]+Fp->components[2]);
-// 	F->components[2] = temp;
-// 	temp = 0.5*(F->components[3]+Fp->components[3]);
-// 	F->components[3] = temp;
-// 	temp = 0.5*(F->components[4]+Fp->components[4]);
-// 	F->components[4] = temp;
-//
-// 	destruct_F_vector(Fp);
-//
-// 	return F;
-// }
 
 F_vector *calculateF_diff(F_vector F_plus, F_vector F_minus)
 {
@@ -356,18 +242,17 @@ void updateU_grid(U_grid *U, U_grid U_temp)
 FLOAT calculateNextU(physics_grid *P, U_grid *U, U_grid U_temp, double dt)
 {
 	int i, j, k, l, index;
-	double dtdx, dtdy, dtdz;
+	FLOAT dtdx, dtdy, dtdz;
 	dtdx = dt/P->delta_x;
 	dtdy = dt/P->delta_y;
 	dtdz = dt/P->delta_z;
 	F_vector *Fx, *Fxl, *Fxr;
 	F_vector *Fy, *Fyl, *Fyr;
 	F_vector *Fz, *Fzl, *Fzr;
-
+	// FLOAT values;
 	FLOAT max, speed;
 	U_vector UV_temp;
 	max = 0;
-	int middle = transform3d(0.5*U->N_x, 0.5*U->N_y, 0.5*U->N_z);
 	for(i=0; i<U->N_x; i++)
 	{
 		for(j=0; j<U->N_y; j++)
@@ -375,24 +260,29 @@ FLOAT calculateNextU(physics_grid *P, U_grid *U, U_grid U_temp, double dt)
 			for(k=0; k<U->N_z; k++)
 			{
 				index = transform3d(i, j, k);
-				Fxr = calculateF_half(U, dtdx, i, j, k, 1, 0, 0);
-				Fxl = calculateF_half(U, dtdx, i, j, k, -1, 0, 0);
-				Fyr = calculateF_half(U, dtdy, i, j, k, 0, 1, 0);
-				Fyl = calculateF_half(U, dtdy, i, j, k, 0, -1, 0);
-				Fzr = calculateF_half(U, dtdz, i, j, k, 0, 0, 1);
-				Fzl = calculateF_half(U, dtdz, i, j, k, 0, 0, -1);
+				Fxr = calculateF_half(U, i, j, k, 1, 0, 0);
+				Fxl = calculateF_half(U, i, j, k, -1, 0, 0);
+				Fyr = calculateF_half(U, i, j, k, 0, 1, 0);
+				Fyl = calculateF_half(U, i, j, k, 0, -1, 0);
+				Fzr = calculateF_half(U, i, j, k, 0, 0, 1);
+				Fzl = calculateF_half(U, i, j, k, 0, 0, -1);
 
 				Fx = calculateF_diff(*Fxr, *Fxl);
 				Fy = calculateF_diff(*Fyr, *Fyl);
 				Fz = calculateF_diff(*Fzr, *Fzl);
-				if(1)
+				for(l=0; l<(NDIM+2); l++)
 				{
-					for(l=0; l<(NDIM+2); l++)
-					{
-						U_temp.U[index].components[l] = U->U[index].components[l]
-						+ ((dtdx)*Fx->components[l] + (dtdy)*Fy->components[l]
-						+ (dtdz)*Fz->components[l]);
-					}
+					// values = U->U[transform3d(i+1, j, k)].components[l] +
+					// 		U->U[transform3d(i-1, j, k)].components[l] +
+					// 		U->U[transform3d(i, j+1, k)].components[l] +
+					// 		U->U[transform3d(i, j-1, k)].components[l] +
+					// 		U->U[transform3d(i, j, k+1)].components[l] +
+					// 		U->U[transform3d(i, j, k-1)].components[l] -
+					// 		6*U->U[index].components[l];
+					// U_temp.U[index].components[l] = U->U[index].components[l] + dtdx*values;
+					U_temp.U[index].components[l] = U->U[index].components[l]
+					+ ((dtdx)*Fx->components[l] + (dtdy)*Fy->components[l]
+					+ (dtdz)*Fz->components[l]);
 				}
 
 				UV_temp = U_temp.U[index];

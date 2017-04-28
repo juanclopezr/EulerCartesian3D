@@ -10,7 +10,7 @@ INCL = Makefile struct.h io.h init.h solver.h problem.h tube.h
 
 all: $(EXEC)
 
-plotsedov: #*_sedov.dat
+plotsedov:
 	python plotter.py $(SEDOV)
 
 plotshock: tube.dat
@@ -24,7 +24,7 @@ tube.dat: $(EXEC)
 
 shock: $(EXEC) tube.dat
 
-sedov: $(EXEC) %_sedov.dat
+sedov: $(EXEC) *_sedov.dat
 
 exec: $(EXEC)
 
